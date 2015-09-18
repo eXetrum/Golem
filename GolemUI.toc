@@ -1,0 +1,10 @@
+## Interface: 60000
+## Title: Golem
+## Version: 0.1beta
+## Notes: GM helper
+## Author: eXetrum
+## SavedVariables: GolemUI_db
+## DefaultState: enabled
+localization.en.lua
+GolemUI.xml
+GolemUI.lua

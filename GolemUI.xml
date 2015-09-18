@@ -1,0 +1,136 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+
+	<Button name="GolemUI_List_Entry_Template" virtual="true" text="USER_NAME">
+		<Size>
+			<AbsDimension x="190" y="25" />
+		</Size>
+		<Layers>
+			<Layer>
+				<FontString name="$parentText" justifyH="LEFT" inherits="GameFontNormalSmall">
+					<Size>
+						<AbsDimension x="180" y="25" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="1" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				getglobal(self:GetName().."BG"):Hide()
+			</OnLoad>
+			<OnEnter>
+				getglobal(self:GetName().."BG"):Show()
+			</OnEnter>
+			<OnLeave>
+				getglobal(self:GetName().."BG"):Hide()
+				--getglobal(self:GetName() .. "BG"):SetVertexColor(0.7, 0.7, 0.7, 0.7)
+			</OnLeave>
+		</Scripts>
+		<NormalTexture name="$parentBG">
+			<Color r="0.5" g="0.5" b="0.5" a="0.85" />
+		</NormalTexture>
+	</Button>
+
+	<Frame name="GolemUI_Main_Frame" parent="UIParent" movable="true" enableMouse="true" clampedToScreen="true">
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton")
+				self:SetUserPlaced(1)
+			</OnLoad>
+			<OnDragStart>
+				self:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				self:StopMovingOrSizing()
+			</OnDragStop>
+		</Scripts>
+		<Anchors>
+			<Anchor point="RIGHT" relativePoint="RIGHT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Size>
+			<AbsDimension x="220" y="320" />
+		</Size>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"
+		edgeFile="Interface\DialogFrame\UI-DialogBox-Border">
+			<TitleSize>
+				<AbsValue val="32" />
+			</TitleSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+		</Backdrop>
+		<Frames>
+			<!--
+			<Frame name="GolemUI_List" >
+			</Frame>
+			-->
+			<Button name="$parentTestButton" text="Test :)" inherits="UIPanelButtonTemplate">
+				<Size>
+					<AbsDimension x="100" y="20" />
+				</Size>
+				<Anchors>
+					<Anchor point="CENTER" relativePoint="BOTTOM">
+						<Offset>
+							<AbsDimension x="0" y="-40" />
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:RegisterForClicks(
+							"LeftButtonUp",
+							"RightButtonUp",
+							"MiddleButtonDown"
+						)
+					</OnLoad>
+					<OnClick>
+						print("Clicked", button)
+						PlaySound("igMainMenuOptionCheckBoxOn")
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+		</Frames>
+		<!--<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="300" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="30" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString inherits="GameFontNormal" text="ADDON_TITLE">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentTitle">
+							<Offset>
+								<AbsDimension x="0" y="-14" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		-->
+	</Frame>
+</Ui>
