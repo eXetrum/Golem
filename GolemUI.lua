@@ -199,7 +199,7 @@ frame.scrollbar = scrollbar
 
 --content frame
 local content = CreateFrame("Frame", "GolemUI_List", scrollframe)
-content:SetSize(100, 50)
+content:SetSize(180, 50)
 --local texture = content:CreateTexture()
 --texture:SetAllPoints()
 --texture:SetTexture("Interface\\GLUES\\MainMenu\\Glues-BlizzardLogo")
