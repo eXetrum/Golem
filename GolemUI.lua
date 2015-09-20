@@ -17,7 +17,7 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		u.msg = msg
 		u.time = GetTime()
 		u.id = userID
-		u.frame = CreateFrame("Button", "$parentEntry"..userID, GolemUI_List, "GolemUI_List_Entry_Template")--GolemUI_Main_Frame, "GolemUI_List_Entry_Template")
+		u.frame = CreateFrame("Button", "$parentEntry"..userID, GolemUI_Main_Frame_List_Items, "GolemUI_List_Entry_Template")--GolemUI_Main_Frame, "GolemUI_List_Entry_Template")
 		u.frame:SetID(userID)
 		u.frame:SetPoint("TOPLEFT", 11, -12 - userID * 24)
 		--if userID == 0 then
@@ -27,6 +27,15 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		--end
 		getglobal(u.frame:GetName().."Text"):SetText(sender)
 		UIFrameFadeIn(u.frame, 1.34);
+		
+		
+		for key, value in next, GolemUI_Main_Frame:GetChildren() do
+			print(key:GetName() , value)
+		end
+		--print (getglobal(GolemUI_Main_Frame_List_Items))
+		
+		
+		
 		--u.frame:Show()
 
 		--GolemUI_List:ClearAllPoints()
@@ -42,11 +51,11 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 	else
 		--print (sender.. " already in list")
 	end
-	if 24 * (GolemUI_List:GetNumChildren() + 1) > GolemUI_List:GetHeight() then
-		GolemUI_List:SetHeight(24 * (GolemUI_List:GetNumChildren() + 1))
+--	if 24 * (GolemUI_List_Entrys:GetNumChildren() + 1) > GolemUI_List_Entrys:GetHeight() then
+--		GolemUI_List_Entrys:SetHeight(24 * (GolemUI_List_Entrys:GetNumChildren() + 1))
 		--GolemUI_List_Scroll:SetMinMaxValues(1, 24 * GolemUI_List:GetNumChildren())
-	end
-	print (GolemUI_List:GetNumChildren() .. " " .. GolemUI_List:GetNumRegions() )
+--	end
+	--print (GolemUI_List_Entrys:GetNumChildren() .. " " .. GolemUI_List_Entrys:GetNumRegions() )
 	--print (GolemUI_List:GetMaxResize())
 	--print (GolemUI_List:GetSize())
 	--print ("COUNT:"..userID)
@@ -159,53 +168,6 @@ local backdrop = {
 
 
 
---parent frame
-local frame = CreateFrame("Frame", "MyFrame", UIParent)
-frame:SetSize(200, 200)
-frame:SetPoint("CENTER")
-local texture = frame:CreateTexture()
-texture:SetAllPoints()
-texture:SetTexture(0, 0, 0, 0.5)
-frame.background = texture
 
---scrollframe
-scrollframe = CreateFrame("ScrollFrame", nil, frame)
-scrollframe:SetPoint("TOPLEFT", 10, -10)
-scrollframe:SetPoint("BOTTOMRIGHT", -10, 10)
-scrollframe:SetSize(200, 200)
-local texture = scrollframe:CreateTexture()
-texture:SetAllPoints()
---texture:SetTexture(.5,.5,.5,1)
-scrollframe:SetBackdrop(backdrop)
-frame.scrollframe = scrollframe
 
---scrollbar
-scrollbar = CreateFrame("Slider", "GolemUI_List_Scroll", scrollframe, "UIPanelScrollBarTemplate")
-scrollbar:SetPoint("TOPLEFT", frame, "TOPRIGHT", 4, -16)
-scrollbar:SetPoint("BOTTOMLEFT", frame, "BOTTOMRIGHT", 4, 16)
-scrollbar:SetMinMaxValues(1, 1)
-scrollbar:SetValueStep(1)
-scrollbar.scrollStep = 1
-scrollbar:SetValue(0)
-scrollbar:SetWidth(16)
-scrollbar:SetScript("OnValueChanged",
-function (self, value)
-self:GetParent():SetVerticalScroll(value)
-end)
-local scrollbg = scrollbar:CreateTexture(nil, "BACKGROUND")
-scrollbg:SetAllPoints(scrollbar)
-scrollbg:SetTexture(0, 0, 0, 0.4)
-frame.scrollbar = scrollbar
 
---content frame
-local content = CreateFrame("Frame", "GolemUI_List", scrollframe)
-content:SetSize(180, 50)
---local texture = content:CreateTexture()
---texture:SetAllPoints()
---texture:SetTexture("Interface\\GLUES\\MainMenu\\Glues-BlizzardLogo")
---content.texture = texture
-content:SetBackdrop(backdrop)
-scrollframe.content = content
-
-scrollframe:SetScrollChild(content) 
---GolemUI_List:SetResizable(enabled)

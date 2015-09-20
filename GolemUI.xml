@@ -38,8 +38,43 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 			<Color r="0.5" g="0.5" b="0.5" a="0.85" />
 		</NormalTexture>
 	</Button>
+	
+	
+	<ScrollFrame name="ListScrollFrameTemplate" inherits="FauxScrollFrameTemplate" virtual="true">
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture file="Interface\ClassTrainerFrame\UI-ClassTrainer-ScrollBar">
+                    <Size>
+                        <AbsDimension x="30" y="120"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+                            <Offset>
+                                <AbsDimension x="-3" y="2"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <TexCoords left="0" right="0.46875" top="0.0234375" bottom="0.9609375"/>
+                </Texture>
+                <Texture file="Interface\ClassTrainerFrame\UI-ClassTrainer-ScrollBar">
+                    <Size>
+                        <AbsDimension x="30" y="123"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+                            <Offset>
+                                <AbsDimension x="-3" y="-2"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <TexCoords left="0.53125" right="1.0" top="0.03125" bottom="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+    </ScrollFrame>
+	
 
-	<Frame name="GolemUI_Main_Frame" parent="UIParent" movable="true" enableMouse="true" clampedToScreen="true">
+	<Frame name="GolemUI_Main_Frame" parent="UIParent" movable="true" enableMouse="true" clampedToScreen="true" >
 		<Scripts>
 			<OnLoad>
 				self:RegisterForDrag("LeftButton")
@@ -62,6 +97,31 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 		<Size>
 			<AbsDimension x="220" y="320" />
 		</Size>
+		<Layers>
+			<Layer level="ARTWORK" parent="GolemUI_Main_Frame">
+				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="300" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="10" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString inherits="GameFontNormal" text="ADDON_TITLE">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentTitle">
+							<Offset>
+								<AbsDimension x="0" y="-13" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"
 		edgeFile="Interface\DialogFrame\UI-DialogBox-Border">
 			<TitleSize>
@@ -73,64 +133,62 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 			<BackgroundInsets>
 				<AbsInset left="11" right="12" top="12" bottom="11" />
 			</BackgroundInsets>
-		</Backdrop>
+		</Backdrop>		
+		
 		<Frames>
-			<!--
-			<Frame name="GolemUI_List" >
-			</Frame>
-			-->
-			<Button name="$parentTestButton" text="Test :)" inherits="UIPanelButtonTemplate">
-				<Size>
-					<AbsDimension x="100" y="20" />
-				</Size>
+			<ScrollFrame name="$parent_List" inherits="FauxScrollFrameTemplate">
 				<Anchors>
-					<Anchor point="CENTER" relativePoint="BOTTOM">
+					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="0" y="-40" />
+							<AbsDimension x="10" y="10" />
 						</Offset>
 					</Anchor>
+					<Anchor point="BOTTOMRIGHT" />	
 				</Anchors>
-				<Scripts>
-					<OnLoad>
-						self:RegisterForClicks(
-							"LeftButtonUp",
-							"RightButtonUp",
-							"MiddleButtonDown"
-						)
-					</OnLoad>
-					<OnClick>
-						print("Clicked", button)
-						PlaySound("igMainMenuOptionCheckBoxOn")
-					</OnClick>
-				</Scripts>
-			</Button>
-			
-		</Frames>
-		<!--<Layers>
-			<Layer level="ARTWORK">
-				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
+				<ScrollChild>
 					<Size>
-						<AbsDimension x="300" y="60"/>
+						<AbsDimension x="200" y="200" />
 					</Size>
 					<Anchors>
-						<Anchor point="TOP">
+						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="0" y="30" />
+								<AbsDimension x="10" y="10" />
 							</Offset>
 						</Anchor>
+						<Anchor point="BOTTOMRIGHT" />	
 					</Anchors>
-				</Texture>
-				<FontString inherits="GameFontNormal" text="ADDON_TITLE">
-					<Anchors>
-						<Anchor point="TOP" relativeTo="$parentTitle">
-							<Offset>
-								<AbsDimension x="0" y="-14" />
-							</Offset>
-						</Anchor>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		-->
+					<Frame name="$parent_Items" parent="GolemUI_Main_Frame">
+						<Anchors>
+							<Anchor point="TOPLEFT">
+								<Offset>
+									<AbsDimension x="10" y="10" />
+								</Offset>
+							</Anchor>
+							<Anchor point="BOTTOMRIGHT" />	
+						</Anchors>
+						<Backdrop bgFile="Interface\\DialogFrame\\UI-DialogBox-Gold-Background" tile="true"
+						edgeFile="Interface\\DialogFrame\\UI-DialogBox-Gold-Border">
+							<TitleSize>
+								<AbsValue val="32" />
+							</TitleSize>
+							<EdgeSize>
+								<AbsValue val="32" />
+							</EdgeSize>
+							<BackgroundInsets>
+								<AbsInset left="11" right="12" top="12" bottom="11" />
+							</BackgroundInsets>
+						</Backdrop>	
+					</Frame>
+				</ScrollChild>
+			</ScrollFrame>
+		</Frames>
+		
+		
+		
+		
+		
+	
+		
+		
 	</Frame>
 </Ui>
