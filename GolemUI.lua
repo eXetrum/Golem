@@ -8,6 +8,9 @@ local userID = 0
 
 local timer = 5
 
+local eventHandlers = {}
+local maxMessages = 0
+local messageFrames = {}
 
 local backdrop = {
   -- path to the background texture
@@ -33,11 +36,11 @@ local statusFrame = CreateFrame("Frame", "Entry_Status", GolemUI_Main_Frame)
 statusFrame:SetPoint("TOPLEFT", GolemUI_Main_Frame, "TOPRIGHT", -640, 0)
 statusFrame:SetPoint("BOTTOMLEFT", GolemUI_Main_Frame, "BOTTOMRIGHT", -400, 0)
 statusFrame:SetWidth(400)
-statusFrame:SetHeight(400)
+--statusFrame:SetHeight(276)
 statusFrame:SetBackdrop(backdrop)
 statusFrame:Hide()
 
-function tess(self)
+function OnShowFrame(self)
 	print("ALARM")
 	local user_entry = nil
 	for k, v in pairs(users) do	
@@ -46,6 +49,7 @@ function tess(self)
 		end
 	end	
 	
+	print("USER: "..user_entry.frame.username..", MSG_COUNT: "..user_entry.msg_count)
 	if user_entry ~= nil then
 		
 		for k, v in pairs(user_entry.messages) do
@@ -62,11 +66,15 @@ end
 
 --scrollframe
 scrollframe = CreateFrame("ScrollFrame", nil, statusFrame)
-scrollframe:SetAllPoints()
+scrollframe:SetPoint("TOPLEFT", statusFrame, "TOPLEFT", 12, -12)
+--scrollframe:SetPoint("BOTTOMRIGHT", statusFrame, "BOTTOMRIGHT", 0, 1)
+scrollframe:SetWidth(376)
+scrollframe:SetHeight(287)
 --local texture = scrollframe:CreateTexture()
 --texture:SetAllPoints()
 --texture:SetTexture(.5,.5,.5,1)
-scrollframe:SetBackdrop(backdrop)
+--scrollframe.texture = texture
+--scrollframe:SetBackdrop(backdrop)
 statusFrame.scrollframe = scrollframe
 
 --scrollbar
@@ -82,7 +90,7 @@ scrollbar:SetScript("OnValueChanged",
 function (self, value)
 --self:GetParent():SetVerticalScroll(value)
 	--print ("value: " .. value)
-	local n = value % 25;
+	local n = value % MESSAGE_BTN_SIZE;
 	self:GetParent():SetVerticalScroll(value)--n * 25)
 	--self:GetParent():SetScrollOffset(select(2, self:GetMinMaxValues()) - value)
 end)
@@ -92,16 +100,28 @@ scrollbg:SetTexture(0, 0, 0, 0.4)
 statusFrame.scrollbar = scrollbar
 --content frame
 local content = CreateFrame("Frame", "GolemUI_Message_List", scrollframe, "ListScrollFrameTemplate")
-content:SetPoint("TOPLEFT", scrollframe, "TOPRIGHT", 0, 0)
-content:SetPoint("BOTTOMLEFT", scrollframe, "BOTTOMRIGHT", 0, 0)
-
+content:SetPoint("TOPLEFT", scrollframe, "TOPLEFT", 10, 0)
+--content:SetPoint("BOTTOMRIGHT", scrollframe, "BOTTOMRIGHT", 0, 0)
+--content:SetHeight(200)
+content:SetWidth(376)
+content:SetHeight(287)
 --content:SetBackdrop(backdrop)
 scrollframe.content = content
 
 scrollframe:SetScrollChild(content) 
 
 
-
+function mysplit(inputstr, sep)
+	if sep == nil then
+			sep = "%s"
+	end
+	local t={} ; i=1
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+			t[i] = str
+			i = i + 1
+	end
+	return t
+end
 
 
 function SelectButton(self, ...)
@@ -112,12 +132,31 @@ function SelectButton(self, ...)
 		statusFrame:Hide()
 	else
 		--print("SELECT")
+		print("FRAME COUNT: "..#messageFrames)
+		print("SELECTED USER: "..self.username..", MSG_COUNT: "..users[self.username].msg_count)
 		
-		print(self.username)
+		if users[self.username].msg_count > 6 then
+			GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, users[self.username].msg_count * MESSAGE_BTN_SIZE - 287)
+		else
+			GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, 0)
+		end
+		
+		for i = 1, #messageFrames do
+			messageFrames[i]:Hide()
+		end
+		
+		
 		
 		for k,v in pairs(users[self.username].messages) do
-			print (k, v.msg, v.time)
+			--print (k, v.msg, v.time)
+			-- Split messsage into words
+			local words = mysplit(v.msg)
+			local s = "|c00ff0000[" .. v.time .. "]|r "..v.msg
+			getglobal(messageFrames[k]:GetName().."Text"):SetText(s)
+			messageFrames[k]:Show()
+			--getglobal(GolemUI_Message_List_Message_..i):Hide()
 		end
+		
 		
 		local u = nil
 		
@@ -130,7 +169,7 @@ function SelectButton(self, ...)
 		statusFrame:Show()
 	end	
 end
-	
+
 	
 
 local total = 0
@@ -165,31 +204,46 @@ function update(self, elapsed)
 end
 
 
-local eventHandlers = {}
-local maxMessages = 0
-local messageFrames = {}
+function RefreshStatusFrame(sender)
+	if users[sender].msg_count > 6 then
+		GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, (users[sender].msg_count - 1) * MESSAGE_BTN_SIZE - 287)
+	else
+		GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, 0)
+	end
+	local u = users[sender]
+	local s = "|c00ff0000[" .. u.messages[u.msg_count].time .. "]|r "..u.messages[u.msg_count].msg
+	getglobal(messageFrames[u.msg_count]:GetName().."Text"):SetText(s)
+	messageFrames[u.msg_count]:Show()
+end
+
+--270
 
 --getglobal(msgFrame:GetName().."Text"):SetText(
 
 function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 	
-	if users[sender] == nil then
+	if users[sender] == nil and sender ~= UnitName("player") then
 		local u = {...}
 		
 		u.ID = userID
 		u.messages = {}
 		u.msg_count = 1
+			
 			local m = {...}
 			m.msg = msg
-			m.time = GetTime()
+			local s = GetTime()
+			m.time = date("%d.%m.%y %H:%M:%S")
+
+			--m.time = "|cFFFF2200[%H:%M:%S]|r";--string.format("%.2d:%.2d:%.2d", s/(60*60), s/60%60, s%60)
 			
 			if maxMessages == 0 then
-				
 				msgFrame = CreateFrame("Button", "$parent_Message_"..maxMessages, GolemUI_Message_List, "GolemUI_Message_List_Template")
-				msgFrame:SetPoint("TOPLEFT", GolemUI_Message_List, "TOPLEFT", 0, 0)
+				msgFrame:SetPoint("TOPLEFT", 0, 0)
 				maxMessages = 1
 				table.insert(messageFrames, msgFrame)				
 			end
+			
+			
 			
 			--m.frame = CreateFrame("Button", "$parent_Entry_"..userID.."_Message_"..u.msg_count, GolemUI_Message_List, "GolemUI_Entry_List_Template")
 			--m.frame:SetPoint("TOPLEFT", GolemUI_Message_List, "TOPLEFT", 0, 0)
@@ -204,12 +258,16 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 			--m.frame:SetID("msg_"userID)
 		
 		table.insert(u.messages, m)
+		
+		
 		--u.frame.selected = false
 		u.frame = CreateFrame("Button", "$parent_Entry_"..userID, GolemUI_Entry_List, "GolemUI_Entry_List_Template")--GolemUI_Main_Frame, "GolemUI_Entry_List_Template")
 		--GolemUI_Main_Frame, "GolemUI_Entry_List_Template")
 		u.frame:SetID(userID)
 		
 		u.frame.username = sender
+		
+		
 		
 		--u.frame:SetPoint("TOPLEFT", 11, -12 - userID * 24)
 		
@@ -241,15 +299,9 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		
 		users[sender] = u
 		userID = userID + 1
-		--table.insert(users, u)
-		--print(event)
-		--print(sender)
-		--print(msg)
-		if sender == first and false then
-			print ("INIT")
-			for k,v in pairs(users[first].messages) do
-				print (k, v.msg, v.time)
-			end
+
+		if u.frame.selected then
+			RefreshStatusFrame(sender)
 		end
 		
 	else
@@ -258,22 +310,27 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		
 		local m = {...}
 		m.msg = msg
-		m.time = GetTime()
+		local s = GetTime()
+		m.time = date("%d.%m.%y %H:%M:%S")
 		
 		if users[sender].msg_count > maxMessages then
 			
+			
 			msgFrame = CreateFrame("Button", "$parent_Message_"..maxMessages, GolemUI_Message_List, "GolemUI_Message_List_Template")
-			msgFrame:SetPoint("TOPLEFT", "$parent_Message_"..(maxMessages - 1), "BOTTOMLEFT", 0, 0)
-			maxMessages = users[sender].msg_count
+			msgFrame:SetPoint("TOPLEFT", "$parent_Message_"..(maxMessages - 1), "BOTTOMLEFT", 0, 0)			
 			table.insert(messageFrames, msgFrame)
 			
-			if 25 * (GolemUI_Message_List:GetNumChildren()) > GolemUI_Message_List:GetHeight() then
-				GolemUI_Message_List:SetHeight(25 * (GolemUI_Message_List:GetNumChildren()))
-				if GolemUI_Message_List:GetNumChildren() > 11 then
-					local n = GolemUI_Main_Frame:GetHeight() % 25;
-					GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, (GolemUI_Message_List:GetNumChildren() - n - 1) * 25)
-				end
+			if MESSAGE_BTN_SIZE * (GolemUI_Message_List:GetNumChildren() + 1) > GolemUI_Message_List:GetHeight() then
+				GolemUI_Message_List:SetHeight(MESSAGE_BTN_SIZE * GolemUI_Message_List:GetNumChildren())
 			end
+			
+			maxMessages = users[sender].msg_count
+		end
+		
+		table.insert(users[sender].messages, m)
+		
+		if users[sender].frame.selected then
+			RefreshStatusFrame(sender)
 		end
 		
 		--m.frame = CreateFrame("Button", "$parent_Entry_"..users[sender].ID.."_Message_"..users[sender].msg_count, GolemUI_Message_List, "GolemUI_Entry_List_Template")
@@ -281,7 +338,7 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		--getglobal(m.frame:GetName().."Text"):SetText(msg)
 		--m.frame:Show()
 		
-		table.insert(users[sender].messages, m)
+		
 		
 		--UIFrameFadeIn(m.frame, 1.34)
 		
@@ -294,12 +351,15 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		--print (sender.. " already in list")
 	end
 
+	
+	--print("Msg frames: "..GolemUI_Message_List:GetNumChildren())
+	
 	--print(GolemUI_List:GetNumChildren())
-	if 25 * (GolemUI_Entry_List:GetNumChildren() + 1) > GolemUI_Entry_List:GetHeight() then
-		GolemUI_Entry_List:SetHeight(25 * (GolemUI_Entry_List:GetNumChildren() + 1))
+	if USER_BTN_SIZE * (GolemUI_Entry_List:GetNumChildren() + 1) > GolemUI_Entry_List:GetHeight() then
+		GolemUI_Entry_List:SetHeight(USER_BTN_SIZE * (GolemUI_Entry_List:GetNumChildren() + 1))
 		if GolemUI_Entry_List:GetNumChildren() > 11 then
-			local n = GolemUI_Main_Frame:GetHeight() % 25;
-			GolemUI_Entry_List_ScrollBar:SetMinMaxValues(0, (GolemUI_Entry_List:GetNumChildren() - n) * 25)
+			local n = GolemUI_Main_Frame:GetHeight() % USER_BTN_SIZE;
+			GolemUI_Entry_List_ScrollBar:SetMinMaxValues(0, (GolemUI_Entry_List:GetNumChildren() - n) * USER_BTN_SIZE)
 		end
 	end
 	--print (GolemUI_List:GetNumChildren() .. " " .. GolemUI_List:GetNumRegions() )
@@ -325,7 +385,7 @@ local function AddonEnable()
 	-- Задаем обработчик
 	GolemUI_Main_Frame:SetScript("OnEvent", ScanChatEventHandler);
 	GolemUI_Main_Frame:Show();
-	print (ADDON_TITLE .. " " .. " Enabled");
+	print ("|c00ff00ff"..ADDON_TITLE .. " " .. " Enabled");
 end
 
 local function AddonDisable()

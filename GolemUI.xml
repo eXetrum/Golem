@@ -50,19 +50,17 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 	</Button>
 	
 	
-	<Button name="GolemUI_Message_List_Template" virtual="true" text="USER_MSG" inherits="UIPanelButtonTemplate">
+	<Button name="GolemUI_Message_List_Template" virtual="true" hidden="true">
 		<Size>
-			<AbsDimension x="300" y="25" />
+			<AbsDimension x="376" y="48" />
 		</Size>
 		<Layers>
 			<Layer>
-				<FontString name="$parentText" justifyH="LEFT" inherits="GameFontNormalSmall">
-					<FontHeight val="12"/>
-
+				<FontString name="$parentText" justifyH="LEFT" inherits="GameFontNormalSmall" text="USER_MSG">
+					<FontHeight val="11" />
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parent" x="20" y="-20" />
-
-						
+						<Anchor point="TOPLEFT" x="5" y="-5" />						
+						<Anchor point="BOTTOMRIGHT" x="-5" y="5" />	
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -74,6 +72,11 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 					"RightButtonUp",
 					"MiddleButtonDown"
 				)
+				getglobal(self:GetName().."BG"):SetVertexColor(1, 1, 1, 0.5)
+				getglobal(self:GetName().."Text"):SetWordWrap("enable")
+				--getglobal(self:GetName().."Text"):SetText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+				--print("STRING HEIGHT: "..getglobal(self:GetName().."Text"):GetStringHeight())
+				--print("STRING Width: "..getglobal(self:GetName().."Text"):GetStringWidth())				
 			</OnLoad>
 			<OnClick>
 				print("Clicked", button, ", id = " .. self:GetName())
@@ -84,10 +87,21 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 				--self:LockHighlight()
 				--SelectButton(self)
 			</OnClick>
+			
+			<OnEnter>
+				getglobal(self:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
+			</OnEnter>
+			<OnLeave>
+				getglobal(self:GetName().."BG"):SetVertexColor(1, 1, 1, 0.5)
+			</OnLeave>
+			
 			<OnUpdate>
 				--update(self, elapsed)
 			</OnUpdate>			
 		</Scripts>
+		<NormalTexture name="$parentBG">
+			<Color r="0.4" g="0.4" b="0.8" />
+		</NormalTexture>
 	</Button>
 	
 	
@@ -95,34 +109,27 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 	
 	<Frame name="ListScrollFrameTemplate" virtual="true">
 		<Size>
-			<AbsDimension x="400" y="50" />
+			<AbsDimension x="400" y="310" />
 		</Size>
 		<Anchors>
-			<Anchor point="TOPRIGHT" relativePoint="TOPLEFT"/>
+			<Anchor point="TOPRIGHT" relativePoint="TOPLEFT">
+				<Offset x="-200" y="0">
+				</Offset>
+			</Anchor>
 			<Anchor point="BOTTOLEFT" relativePoint="BOTTOMRIGHT"/>
 		</Anchors>
 		
-		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"
-		edgeFile="Interface\DialogFrame\UI-DialogBox-Border">
-			<TitleSize>
-				<AbsValue val="32" />
-			</TitleSize>
-			<EdgeSize>
-				<AbsValue val="32" />
-			</EdgeSize>
-			<BackgroundInsets>
-				<AbsInset left="11" right="12" top="12" bottom="11" />
-			</BackgroundInsets>
-		</Backdrop>			
+			
 		<Scripts>
 			<OnShow>
 				--print("LETS SHOW")
-				tess(self)
+				OnShowFrame(self)
 			</OnShow>
 			<OnHide>
 				--print("LETS HIDE")
 			</OnHide>
 		</Scripts>
+
 	</Frame>
 	
 	
