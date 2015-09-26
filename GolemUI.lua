@@ -3,6 +3,12 @@
 -- print("Hello " .. UnitName("player"));
 --MinimapCluster:ClearAllPoints()
 --MinimapCluster:SetPoint("CENTER", 100, -50)
+
+--local addonName, addonTable = ...;
+--print(_G["antispamTable"])
+--table.foreach(_G["antispamTable"], print)
+
+
 local users = {}
 local userID = 0
 
@@ -11,6 +17,8 @@ local timer = 5
 local eventHandlers = {}
 local maxMessages = 0
 local messageFrames = {}
+
+local antispam = _G["Antispam"]
 
 local backdrop = {
   -- path to the background texture
@@ -32,7 +40,7 @@ local backdrop = {
   }
 }
 
-local statusFrame = CreateFrame("Frame", "Entry_Status", GolemUI_Main_Frame)
+local statusFrame = CreateFrame("Frame", "Entry_Status", GolemUI_Main_Frame, "TitleTemplate")
 statusFrame:SetPoint("TOPLEFT", GolemUI_Main_Frame, "TOPRIGHT", -640, 0)
 statusFrame:SetPoint("BOTTOMLEFT", GolemUI_Main_Frame, "BOTTOMRIGHT", -400, 0)
 statusFrame:SetWidth(400)
@@ -151,7 +159,7 @@ function SelectButton(self, ...)
 			--print (k, v.msg, v.time)
 			-- Split messsage into words
 			local words = mysplit(v.msg)
-			local s = "|c00ff0000[" .. v.time .. "]|r "..v.msg
+			local s = "["..v.sec.."]|c00ff0000[" .. v.timestamp .. "]|r "..v.msg
 			getglobal(messageFrames[k]:GetName().."Text"):SetText(s)
 			messageFrames[k]:Show()
 			--getglobal(GolemUI_Message_List_Message_..i):Hide()
@@ -166,6 +174,8 @@ function SelectButton(self, ...)
 		end	
 		self:LockHighlight()
 		self.selected = true
+		
+		getglobal(Entry_Status:GetName().."Text"):SetText(self.username)
 		statusFrame:Show()
 	end	
 end
@@ -211,7 +221,7 @@ function RefreshStatusFrame(sender)
 		GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, 0)
 	end
 	local u = users[sender]
-	local s = "|c00ff0000[" .. u.messages[u.msg_count].time .. "]|r "..u.messages[u.msg_count].msg
+	local s = "["..u.messages[u.msg_count].sec.."]|c00ff0000[" .. u.messages[u.msg_count].timestamp .. "]|r "..u.messages[u.msg_count].msg
 	getglobal(messageFrames[u.msg_count]:GetName().."Text"):SetText(s)
 	messageFrames[u.msg_count]:Show()
 end
@@ -219,10 +229,14 @@ end
 --270
 
 --getglobal(msgFrame:GetName().."Text"):SetText(
-
+local foo = forbiddenWords
 function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 	
-	if users[sender] == nil and sender ~= UnitName("player") then
+	if sender == UnitName("player") then
+		--return
+	end
+	
+	if users[sender] == nil then
 		local u = {...}
 		
 		u.ID = userID
@@ -231,8 +245,8 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 			
 			local m = {...}
 			m.msg = msg
-			local s = GetTime()
-			m.time = date("%d.%m.%y %H:%M:%S")
+			m.timestamp = date("%d.%m.%y %H:%M:%S")
+			m.sec = GetTime()
 
 			--m.time = "|cFFFF2200[%H:%M:%S]|r";--string.format("%.2d:%.2d:%.2d", s/(60*60), s/60%60, s%60)
 			
@@ -292,10 +306,6 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 			--u.frame:RegisterEvent("OnEvent")
 			--u.frame:SetScript("OnUpdate", update)
 		end
-		--u.frame:Show()
-
-		--GolemUI_List:ClearAllPoints()
-		--GolemUI_List:SetPoint("TOP", u.frame
 		
 		users[sender] = u
 		userID = userID + 1
@@ -310,8 +320,8 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		
 		local m = {...}
 		m.msg = msg
-		local s = GetTime()
-		m.time = date("%d.%m.%y %H:%M:%S")
+		m.timestamp = date("%d.%m.%y %H:%M:%S")
+		m.sec = GetTime()
 		
 		if users[sender].msg_count > maxMessages then
 			
@@ -362,13 +372,28 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 			GolemUI_Entry_List_ScrollBar:SetMinMaxValues(0, (GolemUI_Entry_List:GetNumChildren() - n) * USER_BTN_SIZE)
 		end
 	end
-	--print (GolemUI_List:GetNumChildren() .. " " .. GolemUI_List:GetNumRegions() )
-	--print (GolemUI_List:GetMaxResize())
-	--print (GolemUI_List:GetSize())
-	--print ("COUNT:"..userID)
-	--print(event, sender, msg, GetTime());
 	
-	--print (table.getn(users))
+	
+	
+	--split into words array
+	--for word in msg:gmatch("%w+") do print("WORD: "..word) end
+	--for word in msg:gmatch("[_%a][_%w]*") do print("WORD: "..word) end
+	
+	antispam.CheckFlood(users[sender])
+	--antispam.CheckSpam(sender, msg)
+	
+	for word in string.gmatch(msg, "[1234567890abcdefghijklmnopqrstuvwxyzrабвгдеёжзийклмнопрстуфхцчшщъьыэюяABCDEFGHIJKLMNOPQRSTUVWXYZRАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЫЭЮЯ]+") do
+		
+			--SendChatMessage(".st", "SAY", nil, nil);
+			--antispam.ApplySanctions(sender, word)
+		
+		--print(w)
+	end
+	
+	--str = str:gsub("<[^%s>]+", string.lower)
+	--DEFAULT_CHAT_FRAME:AddMessage(_G["antispamTable"]["Allah"])
+	--"COMMON", "DARNASSIAN", "DWARVEN", "DRAENEI", "TAURAHE", "ORCISH", "GUTTERSPEAK", "DEMONIC", "DRACONIC", "KALIMAG", "TITAN", "GNOMISH", "TROLL"
+	--SendChatMessage(".st", "SAY", nil, nil);
 	
 	
 	
@@ -396,7 +421,7 @@ local function AddonDisable()
 	-- Задаем обработчик
 	GolemUI_Main_Frame:SetScript("OnEvent", nil);
 	GolemUI_Main_Frame:Hide();
-	print (ADDON_TITLE .. " " .. " Disabled");
+	print ("|c00ff00ff"..ADDON_TITLE .. " " .. " Disabled");
 end
 
 
