@@ -1,5 +1,3 @@
-EPS = 1e-3
-
 Antispam = {...}
 -- Таблица: сокр. название наказания = команда для выполнения
 Antispam.PunishOptions = {
@@ -52,14 +50,15 @@ function Antispam.CheckFlood(usr)
 	if usr.msg_count < 3 then return end
 	
 	--print((usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec) )
-	if math.abs(usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec - MAX_MSG_TIME) < EPS and
+	
+	if (usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec ) < MAX_MSG_TIME and
 		usr.messages[usr.msg_count].msg == usr.messages[usr.msg_count - 1].msg and
 		usr.messages[usr.msg_count].msg == usr.messages[usr.msg_count - 2].msg then
-		print((usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec) )
-		print(math.abs(usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec - MAX_MSG_TIME))
+		
 		--print("PIZDEC TEBE: "..usr.frame.username)
 		local sz = usr.msg_count;
 		local m = usr.messages;
+		print((usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec) )
 		print("|c00ff0000 ["..m[sz - 2].sec.."]["..m[sz - 2].timestamp.."]"..m[sz - 2].msg.."|r")
 		print("|c00ff0000 ["..m[sz - 1].sec.."]["..m[sz - 1].timestamp.."]"..m[sz - 1].msg.."|r")
 		print("|c00ff0000 ["..m[sz].sec.."]["..m[sz].timestamp.."]"..m[sz].msg.."|r")

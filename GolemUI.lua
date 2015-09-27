@@ -227,10 +227,17 @@ function RefreshStatusFrame(sender)
 end
 
 
+function eventHandlers.CHAT_MSG_SAY(msg, sender, ...)
+	Logs(msg, sender, ...)
+end
+
 function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
+	Logs(msg, sender, ...)
+end
+function Logs(msg, sender, ...)
 	-- Не будем вести логов на самого себя
 	if sender == UnitName("player") then
-		return
+		--return
 	end
 	-- Если юзер еще не добавлен в таблицу наблюдений
 	if users[sender] == nil then
@@ -342,6 +349,7 @@ local function AddonEnable()
 	UIFrameFadeIn(GolemUI_Main_Frame, 1.34);
 	-- Регистрируем событие появления сообщения в общем чате
 	GolemUI_Main_Frame:RegisterEvent("CHAT_MSG_CHANNEL");
+	GolemUI_Main_Frame:RegisterEvent("CHAT_MSG_SAY");
 	-- Задаем обработчик
 	GolemUI_Main_Frame:SetScript("OnEvent", ScanChatEventHandler);
 	GolemUI_Main_Frame:Show();
