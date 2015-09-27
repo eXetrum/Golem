@@ -1,3 +1,5 @@
+EPS = 1e-3
+
 Antispam = {...}
 -- Таблица: сокр. название наказания = команда для выполнения
 Antispam.PunishOptions = {
@@ -46,26 +48,31 @@ function Antispam.ApplySanctions(userName, forbiddenWord)
 	SendChatMessage(antispam[forbiddenWord])
 end
 
-function Antispam.CheckFlood(userData)
-	if userData.msg_count < 3 then return end
-	print((userData.messages[userData.msg_count].sec - userData.messages[userData.msg_count - 2].sec) )
-	if (userData.messages[userData.msg_count].sec - userData.messages[userData.msg_count - 2].sec) < MAX_MSG_TIME and
-		userData.messages[userData.msg_count].msg == userData.messages[userData.msg_count - 1].msg and
-		userData.messages[userData.msg_count].msg == userData.messages[userData.msg_count - 2].msg then
-		print("PIZDEC TEBE: "..userData.frame.username)
-		local sz = userData.msg_count;
-		local m = userData.messages;
-		print("["..m[sz - 2].sec.."]["..m[sz - 2].timestamp.."]"..m[sz - 2].msg)
-		print("["..m[sz - 1].sec.."]["..m[sz - 1].timestamp.."]"..m[sz - 1].msg)
-		print("["..m[sz].sec.."]["..m[sz].timestamp.."]"..m[sz].msg)
+function Antispam.CheckFlood(usr)
+	if usr.msg_count < 3 then return end
+	
+	--print((usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec) )
+	if math.abs(usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec - MAX_MSG_TIME) < EPS and
+		usr.messages[usr.msg_count].msg == usr.messages[usr.msg_count - 1].msg and
+		usr.messages[usr.msg_count].msg == usr.messages[usr.msg_count - 2].msg then
+		print((usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec) )
+		print(math.abs(usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec - MAX_MSG_TIME))
+		--print("PIZDEC TEBE: "..usr.frame.username)
+		local sz = usr.msg_count;
+		local m = usr.messages;
+		print("|c00ff0000 ["..m[sz - 2].sec.."]["..m[sz - 2].timestamp.."]"..m[sz - 2].msg.."|r")
+		print("|c00ff0000 ["..m[sz - 1].sec.."]["..m[sz - 1].timestamp.."]"..m[sz - 1].msg.."|r")
+		print("|c00ff0000 ["..m[sz].sec.."]["..m[sz].timestamp.."]"..m[sz].msg.."|r")
 		PlaySoundFile("Sound\\Creature\\LordMarrowgar\\IC_Marrowgar_Slay02.wav")
-		SendChatMessage("[flood detected] ["..userData.frame.username.."]", "SAY", nil, nil);
-		SendChatMessage("[flood detected] ["..userData.frame.username.."]", "CHANNEL", nil, GetChannelName("all"));
+		SendChatMessage("[flood detected] ["..usr.frame.username.."]", "SAY", nil, nil);
+		
+		--SendChatMessage("[flood detected] ["..usr.frame.username.."]", "CHANNEL", nil, GetChannelName("all"));
+		SendChatMessage(".mute "..usr.frame.username.." 1 test", "SAY", nil, nil);
 		
 	end
 		
 	
-	for k, v in pairs(userData.messages) do
+	for k, v in pairs(usr.messages) do
 		--print(k..")["..v.sec.."]["..v.timestamp.."] "..v.msg)
 		
 			

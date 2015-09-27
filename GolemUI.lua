@@ -226,145 +226,99 @@ function RefreshStatusFrame(sender)
 	messageFrames[u.msg_count]:Show()
 end
 
---270
 
---getglobal(msgFrame:GetName().."Text"):SetText(
-local foo = forbiddenWords
 function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
-	
+	-- Не будем вести логов на самого себя
 	if sender == UnitName("player") then
-		--return
+		return
 	end
-	
+	-- Если юзер еще не добавлен в таблицу наблюдений
 	if users[sender] == nil then
+		-- Создаем таблицу - упаковку для данных пользователя
 		local u = {...}
-		
+		-- Запишем индекс пользователя
 		u.ID = userID
+		-- Таблица сообщений текущего пользователя
 		u.messages = {}
+		-- Т.к. запись только создается - сообщение для записи единственное
 		u.msg_count = 1
-			
-			local m = {...}
-			m.msg = msg
-			m.timestamp = date("%d.%m.%y %H:%M:%S")
-			m.sec = GetTime()
-
-			--m.time = "|cFFFF2200[%H:%M:%S]|r";--string.format("%.2d:%.2d:%.2d", s/(60*60), s/60%60, s%60)
-			
-			if maxMessages == 0 then
-				msgFrame = CreateFrame("Button", "$parent_Message_"..maxMessages, GolemUI_Message_List, "GolemUI_Message_List_Template")
-				msgFrame:SetPoint("TOPLEFT", 0, 0)
-				maxMessages = 1
-				table.insert(messageFrames, msgFrame)				
-			end
-			
-			
-			
-			--m.frame = CreateFrame("Button", "$parent_Entry_"..userID.."_Message_"..u.msg_count, GolemUI_Message_List, "GolemUI_Entry_List_Template")
-			--m.frame:SetPoint("TOPLEFT", GolemUI_Message_List, "TOPLEFT", 0, 0)
-			--getglobal(m.frame:GetName().."Text"):SetText(msg)
-			--UIFrameFadeIn(m.frame, 1.34)
-			
-			
-			
-			--m.frame:Show()
-			--m.frame = CreateFrame("Button", "$parent_Entry_"..userID.."_Message_"..u.msg_count, GolemUI_Message_List, "GolemUI_Entry_List_Template")
-			
-			--m.frame:SetID("msg_"userID)
-		
+		-- Создаем таблицу - упаковку для сообщений
+		local m = {...}
+		-- Сохраняем сообщение
+		m.msg = msg
+		-- Запишем время возникновения сообщения
+		m.timestamp = date("%d.%m.%y %H:%M:%S")
+		-- Запишем "Точное" время сообщения
+		m.sec = GetTime()
+		-- Создаем фреймы для отображения сообщений
+		if maxMessages == 0 then
+			msgFrame = CreateFrame("Button", "$parent_Message_"..maxMessages, GolemUI_Message_List, "GolemUI_Message_List_Template")
+			msgFrame:SetPoint("TOPLEFT", 0, 0)
+			maxMessages = 1
+			table.insert(messageFrames, msgFrame)				
+		end
+		-- Добавляем сообщение в таблицу сообщений текущего пользователя
 		table.insert(u.messages, m)
-		
-		
-		--u.frame.selected = false
-		u.frame = CreateFrame("Button", "$parent_Entry_"..userID, GolemUI_Entry_List, "GolemUI_Entry_List_Template")--GolemUI_Main_Frame, "GolemUI_Entry_List_Template")
-		--GolemUI_Main_Frame, "GolemUI_Entry_List_Template")
+		-- Создаем фрейм - кнопку пользователя
+		u.frame = CreateFrame("Button", "$parent_Entry_"..userID, GolemUI_Entry_List, "GolemUI_Entry_List_Template")
+		-- Задаем ID фрейма
 		u.frame:SetID(userID)
-		
+		-- Запоминаем ник
 		u.frame.username = sender
-		
-		
-		
-		--u.frame:SetPoint("TOPLEFT", 11, -12 - userID * 24)
-		
-		
-		--local mCooldown = CreateFrame("Cooldown", "test", u.frame)
-		--mCooldown:SetAllPoints()
-		--mCooldown:SetCooldown(GetTime(), 10)
-
-		--u.frame:SetBackdrop(backdrop)
+		-- Если пользователь первый в списке
 		if userID == 0 then
+			-- Присоединяем фрейм к родительскому
 			u.frame:SetPoint("TOPLEFT", GolemUI_Entry_List, "TOPLEFT", 0, 0)			
-			--first = sender
 		else
+			-- Иначе присоединяем к предыдущему фрейму (вниз)
 			u.frame:SetPoint("TOPLEFT", "$parent_Entry_"..(userID - 1), "BOTTOMLEFT", 0, 0)			
 		end
+		-- Задаем текст кнопки
 		getglobal(u.frame:GetName().."Text"):SetText(userID.. ". "..sender)		
+		-- Реализуем появление фрейма
 		UIFrameFadeIn(u.frame, 1.34);
-		
-		
-		if userID == 0 then
-			--print("reg")
-			--u.frame:RegisterEvent("OnEvent")
-			--u.frame:SetScript("OnUpdate", update)
-		end
-		
+		-- Сохраняем пользователя в таблице пользователей
 		users[sender] = u
+		-- Переходим к след. идентификатору
 		userID = userID + 1
-
+		-- Если открыто окно статистики сообщений
 		if u.frame.selected then
+			-- Обновляем инфу фрейма статистики
 			RefreshStatusFrame(sender)
 		end
-		
+	-- Если пользователь уже есть в таблице - добавляем сообщение к его списку сообщений
 	else
-		
+		-- Увеличиваем количество сообщений
 		users[sender].msg_count = users[sender].msg_count + 1
-		
+		-- Создаем упаковку для сообщения
 		local m = {...}
+		-- Собираем инфу
 		m.msg = msg
 		m.timestamp = date("%d.%m.%y %H:%M:%S")
 		m.sec = GetTime()
-		
-		if users[sender].msg_count > maxMessages then
-			
-			
+		-- Создаем дополнительный фрейм в окне статистики собщений, если уже созданных не достаточно
+		if users[sender].msg_count > maxMessages then			
 			msgFrame = CreateFrame("Button", "$parent_Message_"..maxMessages, GolemUI_Message_List, "GolemUI_Message_List_Template")
 			msgFrame:SetPoint("TOPLEFT", "$parent_Message_"..(maxMessages - 1), "BOTTOMLEFT", 0, 0)			
 			table.insert(messageFrames, msgFrame)
-			
+			-- Расширяем фрейм родитель
 			if MESSAGE_BTN_SIZE * (GolemUI_Message_List:GetNumChildren() + 1) > GolemUI_Message_List:GetHeight() then
 				GolemUI_Message_List:SetHeight(MESSAGE_BTN_SIZE * GolemUI_Message_List:GetNumChildren())
 			end
-			
+			-- Максимальное количество фреймов теперь равно максимальному количеству сообщений из всех пользователей
 			maxMessages = users[sender].msg_count
 		end
-		
+		-- Добавляем упаклванное сообщение в таблицу сообщений пользователя
 		table.insert(users[sender].messages, m)
-		
+		-- Если открыто окно статистики сообщений
 		if users[sender].frame.selected then
+			-- Обновляем инфу фрейма статистики
 			RefreshStatusFrame(sender)
 		end
-		
-		--m.frame = CreateFrame("Button", "$parent_Entry_"..users[sender].ID.."_Message_"..users[sender].msg_count, GolemUI_Message_List, "GolemUI_Entry_List_Template")
-		--m.frame:SetPoint("TOPLEFT", "$parent_Entry_"..users[sender].ID.."_Message_"..(users[sender].msg_count - 1), "BOTTOMLEFT", 0, 0)			
-		--getglobal(m.frame:GetName().."Text"):SetText(msg)
-		--m.frame:Show()
-		
-		
-		
-		--UIFrameFadeIn(m.frame, 1.34)
-		
-		
-		
-	--u.frame2:SetPoint("TOPLEFT", "$parent_Entry_"..(userID - 1), "BOTTOMLEFT", 0, 0)
-	
-
-		--table.foreach(users[first].messages, print)
-		--print (sender.. " already in list")
 	end
 
 	
-	--print("Msg frames: "..GolemUI_Message_List:GetNumChildren())
-	
-	--print(GolemUI_List:GetNumChildren())
+	-- Проверяем и если необходимо - расширяем фрейм отображения кнопок всех пользователей
 	if USER_BTN_SIZE * (GolemUI_Entry_List:GetNumChildren() + 1) > GolemUI_Entry_List:GetHeight() then
 		GolemUI_Entry_List:SetHeight(USER_BTN_SIZE * (GolemUI_Entry_List:GetNumChildren() + 1))
 		if GolemUI_Entry_List:GetNumChildren() > 11 then
@@ -373,35 +327,16 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 		end
 	end
 	
-	
-	
-	--split into words array
-	--for word in msg:gmatch("%w+") do print("WORD: "..word) end
-	--for word in msg:gmatch("[_%a][_%w]*") do print("WORD: "..word) end
-	
+	-- Проверяем не флудит ли пользователь
 	antispam.CheckFlood(users[sender])
+	-- Проверяем сообщение на спам
 	--antispam.CheckSpam(sender, msg)
-	
-	for word in string.gmatch(msg, "[1234567890abcdefghijklmnopqrstuvwxyzrабвгдеёжзийклмнопрстуфхцчшщъьыэюяABCDEFGHIJKLMNOPQRSTUVWXYZRАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЫЭЮЯ]+") do
-		
-			--SendChatMessage(".st", "SAY", nil, nil);
-			--antispam.ApplySanctions(sender, word)
-		
-		--print(w)
-	end
-	
-	--str = str:gsub("<[^%s>]+", string.lower)
-	--DEFAULT_CHAT_FRAME:AddMessage(_G["antispamTable"]["Allah"])
-	--"COMMON", "DARNASSIAN", "DWARVEN", "DRAENEI", "TAURAHE", "ORCISH", "GUTTERSPEAK", "DEMONIC", "DRACONIC", "KALIMAG", "TITAN", "GNOMISH", "TROLL"
-	--SendChatMessage(".st", "SAY", nil, nil);
-	
-	
-	
 end
+-- Задаем обработчики событий
 local function ScanChatEventHandler(self, event, ...)
 	return eventHandlers[event](...);
 end
-
+-- Вкл адон
 local function AddonEnable()
 	-- Показываем фрейм
 	UIFrameFadeIn(GolemUI_Main_Frame, 1.34);
@@ -412,7 +347,7 @@ local function AddonEnable()
 	GolemUI_Main_Frame:Show();
 	print ("|c00ff00ff"..ADDON_TITLE .. " " .. " Enabled");
 end
-
+-- Выкл адон
 local function AddonDisable()
 	-- Показываем фрейм
 	UIFrameFadeOut(GolemUI_Main_Frame, 1.34);
@@ -423,35 +358,16 @@ local function AddonDisable()
 	GolemUI_Main_Frame:Hide();
 	print ("|c00ff00ff"..ADDON_TITLE .. " " .. " Disabled");
 end
-
-
+-- Добавляем слеш команду для вкл/выкл адона
 SLASH_GOLEM_STATUS1 = "/golem";
 SlashCmdList["GOLEM_STATUS"] = function(msg)
-	print(msg)
-	if msg == "update" then
-		print "update"
-		timer = 5
-	end
-	if msg == "remove" then
-		--print(users[5].user)
-		--table.remove(users, 5)
-		--users[5].frame:Hide()
-	--table.foreach(users, print)
-	
-		--print(users["GolemUI_ListEntry5"])--frame:Hide()
-		--table.remove(users, users["GolemUI_ListEntry5"])
-		--users[].frame = nil
-	end
---	if GolemUI_Main_Frame:IsVisible() then
---		AddonDisable();
---	else
---		AddonEnable();
---	end
-	--print ("status", msg)
-	
+	if GolemUI_Main_Frame:IsVisible() then
+		AddonDisable();
+	else
+		AddonEnable();
+	end	
 end
 
---local users = {}
 
 -- "Ничтожество"
 -- PlaySoundFile("Sound/Creature/Illidan/BLACK_Illidan_09.wav")
@@ -481,22 +397,6 @@ function onUpdate(self, elapsed)
 	end
 end
 
---GolemUI_Main_Frame:SetScript("OnUpdate", onUpdate)
-
---StaticPopupDialogs["TEST"] = {
---	text = "Hellos pip",
---	button1 = "OKAY",
---	timeout = 5
---}
---StaticPopup_Show("TEST")
-
-
-
-
-
-
-
---parent frame
 
 
 local frame = GolemUI_Main_Frame
