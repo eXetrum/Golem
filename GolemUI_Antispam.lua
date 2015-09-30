@@ -1,29 +1,29 @@
 ﻿Antispam = {...}
 -- Таблица: сокр. название наказания = команда для выполнения
 Antispam.PunishOptions = {
-	["prod.gold"]			= ".ban pla %s [-1d] prod.gold",
-	["peklama"]				= ".ban pla %s [-1d] speklama",
-	["moshennik"]			= ".ban pla %s [-1d] moshennik",
-	["komm.d"]				= ".ban pla %s [30d] komm.d",
-	["raspr.bagov"]			= ".ban pla %s [30d] raspr.bagov",
-	["Ockadm/servera"]		= ".ban pla %s [30d] Ockadm/servera",
-	["OckPod"]				= ".ban pla %s [30d] OckPod",
-	["Ock po nacpriznaky"]	= ".ban pla %s [30d] Ock po nacpriznaky",
-	["Obmen/prodaja2.3"]	= ".ban pla %s [14d] Obmen/prodaja2.3",
+	["prod.gold"]			= ".ban pla %s -1d prod.gold",
+	["peklama"]				= ".ban pla %s -1d speklama",
+	["moshennik"]			= ".ban pla %s -1d moshennik",
+	["komm.d"]				= ".ban pla %s 30d komm.d",
+	["raspr.bagov"]			= ".ban pla %s 30d raspr.bagov",
+	["Ockadm/servera"]		= ".ban pla %s 30d Ockadm/servera",
+	["OckPod"]				= ".ban pla %s 30d OckPod",
+	["Ock po nacpriznaky"]	= ".ban pla %s 30d Ock po nacpriznaky",
+	["Obmen/prodaja2.3"]	= ".ban pla %s 14d Obmen/prodaja2.3",
 	
 	
-	["mat"]					= ".mute %s [200] mat",
-	["flood"]				= ".mute %s [200] flood",	
-	["caps"]				= ".mute %s [60] caps",	
-	["caps+flood"]			= ".mute %s [260] caps+flood",
-	["caps+mat"]			= ".mute %s [260] caps+mat",	
-	["flood+mat"]			= ".mute %s [400] flood+mat",
-	["caps+flood+mat"]		= ".mute %s [460] caps+flood+mat",
+	["mat"]					= ".mute %s 200 mat",
+	["flood"]				= ".mute %s 200 flood",	
+	["caps"]				= ".mute %s 60 caps",	
+	["caps+flood"]			= ".mute %s 260 caps+flood",
+	["caps+mat"]			= ".mute %s 260 caps+mat",	
+	["flood+mat"]			= ".mute %s 400 flood+mat",
+	["caps+flood+mat"]		= ".mute %s 460 caps+flood+mat",
 	
 	
-	["zav.mat"]				= ".mute %s [60] zav.mat",
-	["OckIgr"]				= ".mute %s [400] OckIgr",
-	["polit.propaganda"]	= ".mute %s [400] polit.propaganda",
+	["zav.mat"]				= ".mute %s 60 zav.mat",
+	["OckIgr"]				= ".mute %s 400 OckIgr",
+	["polit.propaganda"]	= ".mute %s 400 polit.propaganda",
  }
  
   Antispam.DetectOptions = {
@@ -38,6 +38,7 @@ Antispam.PunishOptions = {
  
  Antispam.BadWords = {
 	"хуй",
+	"нахуй",
 	"пизда", 
 	"джигурда",
 	"лох",
@@ -213,8 +214,8 @@ function Antispam.CheckFlood(usr)
 		print(string.format("|c0000ff00 %-16s:|r|c000000ff %-32s|r", "Capitalized", c))
 		print(string.format("|c0000ff00 %-13s:|r|c000000ff %-32s|r", "CAPS percent", (c / n * 100)))
 		print(string.format("|c0000ff00 %-18s:|r|c00ff0000 %-32s|r", "MAT", w))
-		--SendChatMessage(string.format(Antispam.PunishOptions["caps+mat"], usr.frame.username), "SAY", nil, nil);						
-		SendChatMessage(string.format(Antispam.PunishOptions["caps+mat"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+		SendChatMessage(string.format(Antispam.PunishOptions["caps+mat"], usr.frame.username), "SAY", nil, nil);						
+		--SendChatMessage(string.format(Antispam.PunishOptions["caps+mat"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
 		return;
 	end
 	if caps then
@@ -225,8 +226,8 @@ function Antispam.CheckFlood(usr)
 		print(string.format("|c0000ff00 %-17s:|r|c000000ff %-32s|r", "Total len", n))
 		print(string.format("|c0000ff00 %-16s:|r|c000000ff %-32s|r", "Capitalized", c))
 		print(string.format("|c0000ff00 %-13s:|r|c000000ff %-32s|r", "CAPS percent", (c / n * 100)))
-		--SendChatMessage(string.format(Antispam.PunishOptions["caps"], usr.frame.username), "SAY", nil, nil);		
-		SendChatMessage(string.format(Antispam.PunishOptions["caps"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+		SendChatMessage(string.format(Antispam.PunishOptions["caps"], usr.frame.username), "SAY", nil, nil);		
+		--SendChatMessage(string.format(Antispam.PunishOptions["caps"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
 		return;
 	end
 	if mat then
@@ -235,8 +236,8 @@ function Antispam.CheckFlood(usr)
 		print("|c00ff0000 [MAT] detected |r")
 		print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))
 		print(string.format("|c0000ff00 %-17s:|r|c00ff0000 %-32s|r", "MAT", w))
-		--SendChatMessage(string.format(Antispam.PunishOptions["mat"], usr.frame.username), "SAY", nil, nil);		
-		SendChatMessage(string.format(Antispam.PunishOptions["mat"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+		SendChatMessage(string.format(Antispam.PunishOptions["mat"], usr.frame.username), "SAY", nil, nil);		
+		--SendChatMessage(string.format(Antispam.PunishOptions["mat"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
 		return
 	end
 	
@@ -272,8 +273,8 @@ function Antispam.CheckFlood(usr)
 		print("|c00ff0000 ["..m[sz - 1].sec.."]["..m[sz - 1].timestamp.."]"..m[sz - 1].msg.."|r")
 		print("|c00ff0000 ["..m[sz].sec.."]["..m[sz].timestamp.."]"..m[sz].msg.."|r")
 		
-		--SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "SAY", nil, nil);		
-		SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+		SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "SAY", nil, nil);		
+		--SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
 		
 		
 	end
