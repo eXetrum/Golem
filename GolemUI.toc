@@ -1,4 +1,4 @@
-## Interface: 60000
+﻿## Interface: 60000
 ## Title: Golem
 ## Version: 0.1beta
 ## Notes: GM helper

@@ -1,13 +1,13 @@
--- Lorelle
+﻿-- Lorelle
 -- 160530
+
 -- print("Hello " .. UnitName("player"));
---MinimapCluster:ClearAllPoints()
---MinimapCluster:SetPoint("CENTER", 100, -50)
 
 --local addonName, addonTable = ...;
 --print(_G["antispamTable"])
 --table.foreach(_G["antispamTable"], print)
 
+GolemUI_Main_Frame:SetFrameStrata("DIALOG")
 
 local users = {}
 local userID = 0
@@ -100,7 +100,6 @@ function (self, value)
 	--print ("value: " .. value)
 	local n = value % MESSAGE_BTN_SIZE;
 	self:GetParent():SetVerticalScroll(value)--n * 25)
-	--self:GetParent():SetScrollOffset(select(2, self:GetMinMaxValues()) - value)
 end)
 local scrollbg = scrollbar:CreateTexture(nil, "BACKGROUND")
 scrollbg:SetAllPoints(scrollbar)
@@ -243,6 +242,9 @@ function Logs(msg, sender, ...)
 	if users[sender] == nil then
 		-- Создаем таблицу - упаковку для данных пользователя
 		local u = {...}
+		
+		u.msgLine = DEFAULT_CHAT_FRAME:GetCurrentLine();
+		
 		-- Запишем индекс пользователя
 		u.ID = userID
 		-- Таблица сообщений текущего пользователя
