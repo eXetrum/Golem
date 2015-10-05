@@ -478,9 +478,6 @@ local scrollbg = scrollbar:CreateTexture(nil, "BACKGROUND")
 scrollbg:SetAllPoints(scrollbar)
 scrollbg:SetTexture(0, 0, 0, 0.4)
 frame.scrollbar = scrollbar
-
-
-
 --content frame
 local content = CreateFrame("Frame", "GolemUI_Entry_List", scrollframe)
 content:SetSize(200, 50)
@@ -494,13 +491,5 @@ content:SetAllPoints()
 --content:SetBackdrop(backdrop)
 scrollframe.content = content
 
-scrollframe:SetScrollChild(content) 
-
-
-
-
+scrollframe:SetScrollChild(content)
 ----------------------------------------------------------
-----------------------------------------------------------
-----------------------------------------------------------
-----------------------------------------------------------
-

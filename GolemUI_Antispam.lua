@@ -55,7 +55,7 @@ Antispam.PunishOptions = {
 }
 
 Antispam.Sellers = {
-	"club91913726"
+	"club91913726",
 	"club50642399",
 	"club99832475",
 	"club102765330",

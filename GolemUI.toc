@@ -5,6 +5,7 @@
 ## Author: eXetrum
 ## SavedVariables: GolemUI_antiSpamDB
 ## DefaultState: enabled
+
 localization.en.lua
 GolemUI_Antispam.lua
 GolemUI.xml
