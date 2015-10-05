@@ -54,9 +54,35 @@ Antispam.PunishOptions = {
 	"бля",
 }
 
- Antispam.ForbiddenWords = {
-	""
- }
+Antispam.Sellers = {
+	"club91913726"
+	"club50642399",
+	"club99832475",
+	"club102765330",
+	"vk.com/wow.gold60",
+	"isgold.ru",
+	"newsalecircle.besaba.com",
+	"vk.com/wowcirclegameslolz",
+	"vk.com/gold_751",
+	"vk.com/itemshopc",
+	"Fraksol",
+	"The_beacp_ep",
+	"dima.fedosov96",
+	"Goldmen322",
+	"ro_m_an-s",
+	"pandagold"
+}
+
+Antispam.Advertisers = {
+	"Quantumwow",
+	"aiveka.com",
+	"SKREAMWOW.RU",
+	"River.Rise.ru",
+	"riverrise.ru",
+	"wowbaks.ru",
+	"ms-w/ow.ru"
+}
+
 
 
 Antispam.Rules = {
@@ -189,7 +215,80 @@ local function ContainBadWords(message)
 	return false, nil
 end
 
+
+function utf8find(str, ch, k)
+
+	k = k or 1
+	
+	for i = k, strlenutf8(str) do
+		local si = utf8sub(str, i, 1)
+		if strbyte(si) == strbyte(ch) then return i end
+	end	
+	return nil
+end
+
+function CanConstruct(message, word)
+	--t = utf8split("sssqqqzzz")
+	--table.foreach(t, print)
+	--"pСАЛОaxzxnxdxctsxaxgx4СССАЛОxoxtxlxxd"
+	--for i = 1, strlenutf8(message) do
+		--local s = utf8sub(message, i, 1)
+		--print(s .. " " .. tostring(strbyte(s)))
+	--end
+	--if true then return end
+	
+	
+	
+	
+	for i = 1, #replaceTable do
+		message = string.gsub(message, replaceTable[i], " ")
+	end
+	
+	msgSize = strlenutf8(message)
+	wordSize = strlenutf8(word)
+	if msgSize < wordSize then return false end
+	
+	--msgTable = utf8split(message)
+	local k = 1
+	local pos = -1
+	for i = 1, wordSize do
+		s = utf8sub(word, i, 1)
+		--print(i.." " .. s)
+		--pos = string.find(message, s, k)
+		pos = utf8find(message, s, k)
+		
+		--print("s: [" ..s.. "] k: ".. k.. " pos: " .. tostring(pos))
+		
+		if (pos == nil) or (pos < k) then return false end
+		--local n = pos - k - 1
+		--local sep = utf8sub(message, k + 1, n)
+		--items = utf8split( sep )
+		--flags = {}
+		--local unique_chars = 0
+		--local unique_mask_chars = 0
+		--for j = 1, #items do
+		--	if not flags[items[j]] then
+		--		flags[items[j]] = true
+		--		if inTable(mask, items[j]) then unique_mask_chars = unique_mask_chars + 1 end
+		--		unique_chars = unique_chars + 1
+		--	end
+		--end
+		
+		--print("char: ["..s.."], sep: " .. sep .. ", unique_chars: " .. unique_chars.. ", unique_mask_chars: " .. unique_mask_chars)
+		--print("separator chars: " .. utf8sub(message, k + 1, n))--tostring(pos - k - 1))
+		
+		--if unique_mask_chars > COMPOUND_SENSETIVITY then return false end
+		
+		
+		
+		k = pos
+		
+	end
+	return true
+end
+
 function Antispam.CheckFlood(usr)
+	
 	--print(sound[1])
 	--print(sound[#sound])
 	--table.foreach(DEFAULT_CHAT_FRAME, print)
@@ -197,10 +296,45 @@ function Antispam.CheckFlood(usr)
 	--print("InsertMode: "..DEFAULT_CHAT_FRAME:GetInsertMode())
 	--print("CurrentScroll: ".. DEFAULT_CHAT_FRAME:GetCurrentScroll())
 	
+	text = usr.messages[usr.msg_count].msg
+	for i = 1, #replaceTable do
+		text = string.gsub(text, replaceTable[i], "")
+	end
 	
+	--print(text)
 	
 	
 	--if usr.frame.username == UnitName("player") then
+		-- Prodavci
+		for i, seller in pairs(Antispam.Sellers) do
+			--if CanConstruct(msg, v) then
+			if string.find(text, seller) ~= nil then
+				Screenshot();
+				PlaySoundFile(sound[math.random(1, #sound)])
+				print("|c00ff0000 [Seller detected] |r")
+				print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+				SendChatMessage(string.format(Antispam.PunishOptions["prod.gold"], usr.frame.username), "SAY", nil, nil);
+				return;
+			end
+		end
+		-- Reklama
+		for i, advertiser in pairs(Antispam.Advertisers) do
+			--if CanConstruct(msg, v) then
+			if string.find(text, advertiser) ~= nil then
+				Screenshot();
+				PlaySoundFile(sound[math.random(1, #sound)])
+				print("|c00ff0000 [Advertiser detected] |r")
+				print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+				SendChatMessage(string.format(Antispam.PunishOptions["reklama"], usr.frame.username), "SAY", nil, nil);				
+				return;
+			end
+		end
+	--end
+	
+	
+	
+	
+	--if true then return end
 	
 	caps, c, n = IsCaps(usr.messages[usr.msg_count].msg)
 	mat, w = ContainBadWords(usr.messages[usr.msg_count].msg)	

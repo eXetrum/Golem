@@ -233,6 +233,37 @@ end
 function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 	Logs(msg, sender, ...)
 end
+
+
+
+
+
+
+function eventHandlers.CHAT_MSG_WHISPER(msg, sender, ...)
+	print(msg.." "..sender)
+end
+
+
+
+GolemUI_Main_Frame:RegisterEvent("UI_ERROR_MESSAGE")
+GolemUI_Main_Frame:RegisterEvent("UI_INFO_MESSAGE")
+
+
+function eventHandlers.UI_ERROR_MESSAGE(self, ...)
+	print("UI_ERROR_MESSAGE event")
+	print(...)
+end
+
+function eventHandlers.UI_INFO_MESSAGE(self, ...)
+	print("UI_INFO_MESSAGE event")
+	print(...)
+end
+
+
+
+
+
+
 function Logs(msg, sender, ...)
 	-- Не будем вести логов на самого себя
 	if sender == UnitName("player") then
@@ -243,7 +274,7 @@ function Logs(msg, sender, ...)
 		-- Создаем таблицу - упаковку для данных пользователя
 		local u = {...}
 		
-		u.msgLine = DEFAULT_CHAT_FRAME:GetCurrentLine();
+		--u.msgLine = DEFAULT_CHAT_FRAME:GetCurrentLine();
 		
 		-- Запишем индекс пользователя
 		u.ID = userID
@@ -352,6 +383,8 @@ local function AddonEnable()
 	-- Регистрируем событие появления сообщения в общем чате
 	GolemUI_Main_Frame:RegisterEvent("CHAT_MSG_CHANNEL");
 	GolemUI_Main_Frame:RegisterEvent("CHAT_MSG_SAY");
+	
+	GolemUI_Main_Frame:RegisterEvent("CHAT_MSG_WHISPER");
 	-- Задаем обработчик
 	GolemUI_Main_Frame:SetScript("OnEvent", ScanChatEventHandler);
 	GolemUI_Main_Frame:Show();
@@ -363,6 +396,8 @@ local function AddonDisable()
 	UIFrameFadeOut(GolemUI_Main_Frame, 1.34);
 	-- Регистрируем событие появления сообщения в общем чате
 	GolemUI_Main_Frame:UnregisterEvent("CHAT_MSG_CHANNEL");
+	GolemUI_Main_Frame:UnregisterEvent("CHAT_MSG_SAY");
+	GolemUI_Main_Frame:UnregisterEvent("CHAT_MSG_WHISPER");
 	-- Задаем обработчик
 	GolemUI_Main_Frame:SetScript("OnEvent", nil);
 	GolemUI_Main_Frame:Hide();
