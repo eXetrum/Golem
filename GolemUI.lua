@@ -1,11 +1,7 @@
 ﻿-- Lorelle
 -- 160530
 
--- print("Hello " .. UnitName("player"));
-
---local addonName, addonTable = ...;
---print(_G["antispamTable"])
---table.foreach(_G["antispamTable"], print)
+print("|c0000ff00 Hello " .. UnitName("player") .. "|r");
 
 GolemUI_Main_Frame:SetFrameStrata("DIALOG")
 
@@ -66,11 +62,6 @@ function OnShowFrame(self)
 	end
 	
 end
-
---statusFrame:RegisterEvent("OnEvent")
---statusFrame:SetScript("OnShow", tess)
-
-
 
 --scrollframe
 scrollframe = CreateFrame("ScrollFrame", nil, statusFrame)
@@ -179,40 +170,6 @@ function SelectButton(self, ...)
 	end	
 end
 
-	
-
-local total = 0
-
-function update(self, elapsed)
-	
-	--DEFAULT_CHAT_FRAME:AddMessage("up")
-	do
-		local timer = 5
-		function tick()
-			timer = timer - 1
-			return timer
-		end	
-		function getTimer()
-			return timer
-		end
-	end
-	
-	total = total + elapsed
-	
-	if total >= 1 and getTimer() > 0 then
-		print(self:GetName().. " tick " .. getTimer())
-		local i = tick()
-		--DEFAULT_CHAT_FRAME:AddMessage(timer)
-		total = 0
-		if i == 0 then
-			--DEFAULT_CHAT_FRAME:AddMessage("DONE")
-			self:UnregisterEvent("OnEvent")
-			self:SetScript("OnUpdate", nil)			
-		end
-	end
-end
-
-
 function RefreshStatusFrame(sender)
 	if users[sender].msg_count > 6 then
 		GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, (users[sender].msg_count - 1) * MESSAGE_BTN_SIZE - 287)
@@ -235,33 +192,14 @@ function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
 end
 
 
-
-
-
-
 function eventHandlers.CHAT_MSG_WHISPER(msg, sender, ...)
-	print(msg.." "..sender)
+	Logs(msg, sender, ...)
 end
 
 
 
-GolemUI_Main_Frame:RegisterEvent("UI_ERROR_MESSAGE")
-GolemUI_Main_Frame:RegisterEvent("UI_INFO_MESSAGE")
-
-
-function eventHandlers.UI_ERROR_MESSAGE(self, ...)
-	print("UI_ERROR_MESSAGE event")
-	print(...)
-end
-
-function eventHandlers.UI_INFO_MESSAGE(self, ...)
-	print("UI_INFO_MESSAGE event")
-	print(...)
-end
-
-
-
-
+--GolemUI_Main_Frame:RegisterEvent("UI_ERROR_MESSAGE")
+--GolemUI_Main_Frame:RegisterEvent("UI_INFO_MESSAGE")
 
 
 function Logs(msg, sender, ...)
@@ -272,10 +210,7 @@ function Logs(msg, sender, ...)
 	-- Если юзер еще не добавлен в таблицу наблюдений
 	if users[sender] == nil then
 		-- Создаем таблицу - упаковку для данных пользователя
-		local u = {...}
-		
-		--u.msgLine = DEFAULT_CHAT_FRAME:GetCurrentLine();
-		
+		local u = {...}		
 		-- Запишем индекс пользователя
 		u.ID = userID
 		-- Таблица сообщений текущего пользователя
@@ -367,10 +302,8 @@ function Logs(msg, sender, ...)
 		end
 	end
 	
-	-- Проверяем не флудит ли пользователь
-	antispam.CheckFlood(users[sender])
-	-- Проверяем сообщение на спам
-	--antispam.CheckSpam(sender, msg)
+	-- Проверяем сообщение пользователя
+	antispam.MessageCheck(users[sender])
 end
 -- Задаем обработчики событий
 local function ScanChatEventHandler(self, event, ...)
@@ -413,36 +346,11 @@ SlashCmdList["GOLEM_STATUS"] = function(msg)
 	end	
 end
 
-
--- "Ничтожество"
--- PlaySoundFile("Sound/Creature/Illidan/BLACK_Illidan_09.wav")
--- "Ненависть десяти тысяч лет"
--- PlaySoundFile("Sound/Creature/Illidan/BLACK_Illidan_08.wav")
--- "Сила истинного демона"
--- PlaySoundFile("Sound/Creature/Illidan/BLACK_Illidan_13.wav")
--- "Вы не готовы"
--- PlaySoundFile("Sound/Creature/Illidan/BLACK_Illidan_04.wav")
---GolemUI_Main_Frame:Show()
-
-
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
 AddonEnable();
-
-
-local total = 0
-function onUpdate(self, elapsed)
-	total = total + elapsed
-	if total >= 1 and timer > 0 then
-		DEFAULT_CHAT_FRAME:AddMessage(timer)
-		timer = timer - 1
-		total = 0
-		if timer == 0 then
-			DEFAULT_CHAT_FRAME:AddMessage("DONE")
-			GolemUI_Main_Frame:SetScript("OnUpdate", nil)
-		end
-	end
-end
-
-
+----------------------------------------------------------------------------
+----------------------------------------------------------------------------
 
 local frame = GolemUI_Main_Frame
 
@@ -486,8 +394,6 @@ content:SetAllPoints()
 --texture:SetAllPoints()
 --texture:SetTexture("Interface\\GLUES\\MainMenu\\Glues-BlizzardLogo")
 --content.texture = texture
-
-
 --content:SetBackdrop(backdrop)
 scrollframe.content = content
 

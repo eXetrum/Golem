@@ -26,15 +26,6 @@ Antispam.PunishOptions = {
 	["polit.propaganda"]	= ".mute %s 400 polit.propaganda",
  }
  
-  Antispam.DetectOptions = {
-	["word"]				= CheckEachWord,
-	["substr"]				= "",
-	["word&substr"]			= ""
- }
- 
- function CheckEachWord(a, b, c)
-	print("CheckEachWord:", a)
- end
  
  Antispam.BadWords = {
 	"хуй",
@@ -83,13 +74,20 @@ Antispam.Advertisers = {
 	"ms-w/ow.ru"
 }
 
+Antispam.AbuseText = {
+	"енот est kompot"
+}
 
-
-Antispam.Rules = {
-	--[word]		[detect option]						[punish option]
-	["allah"] =		{detect = "substr", 			punish = "Ock po nacpriznaky"},
-	["monah"] = 	{detect = "word", 				punish = "Ock po nacpriznaky"}
- }
+Antispam.replaceTable = {
+	"{звезда}", 		--желтая звезда
+	"{круг}", 			--оранжевый круг
+	"{ромб}", 			--розовый ромб
+	"{треугольник}", 	--зелёный треугольник
+	"{полумесяц}",		--светло-голубой полумесяц
+	"{квадрат}",		--синий квадрат
+	"{крест}",			--красный квадрат
+	"{череп}"			--белый череп
+}
 
 local sound = {
 	-- "Сгииинь, в вечных муках"
@@ -100,10 +98,8 @@ local sound = {
 	"Sound\\creature\\CardinalDeathwhisper\\IC_Deathwhisper_Slay01.wav",
 	"Sound\\creature\\CardinalDeathwhisper\\IC_Deathwhisper_Slay02.wav",
 	
-	
 	"Sound\\Creature\\LichKing\\IC_Lich King_Slay01.wav",
-	"Sound\\Creature\\LichKing\\IC_Lich King_Slay02.wav",
-	
+	"Sound\\Creature\\LichKing\\IC_Lich King_Slay02.wav",	
 	-- "Ничтожество"
 	"Sound/Creature/Illidan/BLACK_Illidan_09.wav",
 	-- "Ненависть десяти тысяч лет"
@@ -112,26 +108,7 @@ local sound = {
 	"Sound/Creature/Illidan/BLACK_Illidan_13.wav",
 	-- "Вы не готовы"
 	"Sound/Creature/Illidan/BLACK_Illidan_04.wav",
-} 
-local replaceTable = {
-	"{звезда}", 		--желтая звезда
-	"{круг}", 			--оранжевый круг
-	"{ромб}", 			--розовый ромб
-	"{треугольник}", 	--зелёный треугольник
-	"{полумесяц}",		--светло-голубой полумесяц
-	"{квадрат}",		--синий квадрат
-	"{крест}",			--красный квадрат
-	"{череп}"			--белый череп
 }
- 
- 
-function Antispam.ApplySanctions(userName, forbiddenWord)
-	SendChatMessage("Выдать пиздюлину "..userName.." за слово |c00ff00ff["..forbiddenWord.."]|r", "SAY", nil, nil);
-	SendChatMessage(antispam[forbiddenWord])
-end
-
-
-
 
 local function chsize(char)
     if not char then
@@ -191,7 +168,6 @@ function inTable(t, s)
 end
 mask = utf8split("abcdefghijklmnopqrstuvwxyzrабвгдеёжзийклмнопрстуфхцчшщъьыэюяABCDEFGHIJKLMNOPQRSTUVWXYZRАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЫЭЮЯ")
 
-
 local function IsCaps(str)
 	local sz = strlenutf8(str)
 	if sz < CAPS_MIN_MSG_LEN then return false end
@@ -215,7 +191,6 @@ local function ContainBadWords(message)
 	return false, nil
 end
 
-
 function utf8find(str, ch, k)
 
 	k = k or 1
@@ -226,22 +201,10 @@ function utf8find(str, ch, k)
 	end	
 	return nil
 end
-
-function CanConstruct(message, word)
-	--t = utf8split("sssqqqzzz")
-	--table.foreach(t, print)
-	--"pСАЛОaxzxnxdxctsxaxgx4СССАЛОxoxtxlxxd"
-	--for i = 1, strlenutf8(message) do
-		--local s = utf8sub(message, i, 1)
-		--print(s .. " " .. tostring(strbyte(s)))
-	--end
-	--if true then return end
-	
-	
-	
-	
-	for i = 1, #replaceTable do
-		message = string.gsub(message, replaceTable[i], " ")
+-- Тестовая функция определения возможности построения заданного слова из набора символов сообщения
+function CanConstruct(message, word)	
+	for i = 1, #Antispam.replaceTable do
+		message = string.gsub(message, Antispam.replaceTable[i], " ")
 	end
 	
 	msgSize = strlenutf8(message)
@@ -278,65 +241,64 @@ function CanConstruct(message, word)
 		--print("separator chars: " .. utf8sub(message, k + 1, n))--tostring(pos - k - 1))
 		
 		--if unique_mask_chars > COMPOUND_SENSETIVITY then return false end
-		
-		
-		
 		k = pos
-		
 	end
 	return true
 end
 
-function Antispam.CheckFlood(usr)
-	
-	--print(sound[1])
-	--print(sound[#sound])
-	--table.foreach(DEFAULT_CHAT_FRAME, print)
-	--print("CurrentLine: "..DEFAULT_CHAT_FRAME:GetCurrentLine())
-	--print("InsertMode: "..DEFAULT_CHAT_FRAME:GetInsertMode())
-	--print("CurrentScroll: ".. DEFAULT_CHAT_FRAME:GetCurrentScroll())
-	
+function Antispam.MessageCheck(usr)
 	text = usr.messages[usr.msg_count].msg
-	for i = 1, #replaceTable do
-		text = string.gsub(text, replaceTable[i], "")
+	for i = 1, #Antispam.replaceTable do
+		text = string.gsub(text, Antispam.replaceTable[i], "")
+	end
+	-- Prodavci
+	for i, seller in pairs(Antispam.Sellers) do
+		--if CanConstruct(msg, v) then
+		if string.find(text, seller) ~= nil then
+			Screenshot();
+			PlaySoundFile(sound[math.random(1, #sound)])
+			print("|c00ff0000 [Seller detected] |r")
+			print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+			SendChatMessage(string.format(Antispam.PunishOptions["prod.gold"], usr.frame.username), "SAY", nil, nil);
+			return;
+		end
+	end
+	-- Reklama
+	for i, advertiser in pairs(Antispam.Advertisers) do
+		--if CanConstruct(msg, v) then
+		if string.find(text, advertiser) ~= nil then
+			Screenshot();
+			PlaySoundFile(sound[math.random(1, #sound)])
+			print("|c00ff0000 [Advertiser detected] |r")
+			print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+			SendChatMessage(string.format(Antispam.PunishOptions["reklama"], usr.frame.username), "SAY", nil, nil);				
+			return;
+		end
+	end
+	-- Polnoe predlojenie
+	for i, j in pairs(Antispam.AbuseText) do
+		if usr.messages[usr.msg_count].msg == j then
+			Screenshot();
+			PlaySoundFile(sound[math.random(1, #sound)])
+			print("|c00ff0000 [AbuseText detected] |r")
+			print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			SendChatMessage("Чето пизданул ["..usr.frame.username.."] не то", "SAY", nil, nil);			
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------			
+			--SendChatMessage(string.format(Antispam.PunishOptions["reklama"], usr.frame.username), "SAY", nil, nil);				
+			return;
+		end
 	end
 	
-	--print(text)
-	
-	
-	--if usr.frame.username == UnitName("player") then
-		-- Prodavci
-		for i, seller in pairs(Antispam.Sellers) do
-			--if CanConstruct(msg, v) then
-			if string.find(text, seller) ~= nil then
-				Screenshot();
-				PlaySoundFile(sound[math.random(1, #sound)])
-				print("|c00ff0000 [Seller detected] |r")
-				print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
-				SendChatMessage(string.format(Antispam.PunishOptions["prod.gold"], usr.frame.username), "SAY", nil, nil);
-				return;
-			end
-		end
-		-- Reklama
-		for i, advertiser in pairs(Antispam.Advertisers) do
-			--if CanConstruct(msg, v) then
-			if string.find(text, advertiser) ~= nil then
-				Screenshot();
-				PlaySoundFile(sound[math.random(1, #sound)])
-				print("|c00ff0000 [Advertiser detected] |r")
-				print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
-				SendChatMessage(string.format(Antispam.PunishOptions["reklama"], usr.frame.username), "SAY", nil, nil);				
-				return;
-			end
-		end
-	--end
-	
-	
-	
-	
-	--if true then return end
-	
+	-- Проверяем на капс
 	caps, c, n = IsCaps(usr.messages[usr.msg_count].msg)
+	-- Проверяем на содержание запрещенных слов
 	mat, w = ContainBadWords(usr.messages[usr.msg_count].msg)	
 	
 	if caps and mat then
@@ -374,12 +336,8 @@ function Antispam.CheckFlood(usr)
 		--SendChatMessage(string.format(Antispam.PunishOptions["mat"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
 		return
 	end
-	
-	--if true then return end
-	
+	-- Секция проверки флуда
 	if usr.msg_count < 3 then return end
-	
-	--print((usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec) )
 	
 	if (usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec ) < MAX_MSG_TIME and
 		usr.messages[usr.msg_count].msg == usr.messages[usr.msg_count - 1].msg and
@@ -388,14 +346,7 @@ function Antispam.CheckFlood(usr)
 		Screenshot();
 		PlaySoundFile(sound[math.random(1, #sound)])
 		--TakeScreenshot();
-		--isConnected = UnitIsConnected("unit")
-		
-		for i = 1, #replaceTable do
-			--usr.messages[usr.msg_count].msg = string.gsub(usr.messages[usr.msg_count].msg, replaceTable[i], " ")
-		end
-		
-		
-		
+		--isConnected = UnitIsConnected("unit")		
 		local sz = usr.msg_count;
 		local m = usr.messages;
 		
@@ -409,60 +360,5 @@ function Antispam.CheckFlood(usr)
 		
 		SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "SAY", nil, nil);		
 		--SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
-		
-		
 	end
-		
-	
-	for k, v in pairs(usr.messages) do
-		--print(k..")["..v.sec.."]["..v.timestamp.."] "..v.msg)
-		
-			
-		
-	end
-end
-
-function Antispam.CheckSpam(user, message)
-	--local s = Antispam.PunishTable["prod.gold"]
-	--print(string.format(s, user))
-	message = string.lower(message)
-	
-	
-	
-	-- Проверяем весь месседж на подстроки
-	for word, options in pairs(Antispam.Rules) do
-		if options["detect"] == "substr" then
-			if strfind(message, word) ~= nil then
-				print("Найдена подстрока: ["..word.."], punish: "..options["punish"])
-				--local f = Antispam.SubStrings[k]
-				--local punishMethod = Antispam.SubStringsTable[k]
-				--PunishTable[punishMethod](user)
-				
-				--
-				return
-			end
-		end
-		
-		--local w = Antispam.DetectOptions[punish["detect"]]
-		--print(w(user, _, _))
-		
-		
-	end
-	
-	
-	
-	for word in string.gmatch(message, "[1234567890abcdefghijklmnopqrstuvwxyzrабвгдеёжзийклмнопрстуфхцчшщъьыэюяABCDEFGHIJKLMNOPQRSTUVWXYZRАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЫЭЮЯ]+") do
-		--if Antispam.WordsTable[word] ~= nil then
-			--SendChatMessage(".st", "SAY", nil, nil);
-			--local punishMethod = Antispam.WordsTable[word];
-			--print("USER: "..user..", MSG: "..message)
-			--print("WORD: "..word)
-			--PunishTable[punishMethod](user)
-			--print("PUNISH: "..)
-			break
-		--end
-		--print(w)
-	end
-	
-	
 end
