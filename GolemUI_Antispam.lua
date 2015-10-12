@@ -75,7 +75,8 @@ Antispam.Advertisers = {
 }
 
 Antispam.AbuseText = {
-	"енот est kompot"
+	"енот est kompot",
+	"salo ежа"
 }
 
 Antispam.replaceTable = {
