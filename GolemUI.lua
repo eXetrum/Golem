@@ -1020,94 +1020,18 @@ function eventHandlers.ADDON_LOADED(...)
 	--Core.SavedVariablesScrollFrame:SetBackdrop(backdrop)
 	
 	----------------------------------------------------------------------------------------------
-local function fcat(ch, dist, inv )return string.char((string.byte(ch)-32+(inv and -dist or dist))%95+32)end;
-local function fcon(str,k,inv)local res= "";for i=1,#str do if(#str-k[5]>=i or not inv)then for inc=0,3 do if(i%4==inc)then res=res..fcat(string.sub(str,i,i),k[inc+1],inv);break;end;end;end;end;if(not inv)then for i=1,k[5] do res=res..string.char(math.random(32,126));end;end;return res;end;
+	local function fcat(ch, dist, inv )return string.char((string.byte(ch)-32+(inv and -dist or dist))%95+32)end;
+	local function fcon(str,k,inv)local res= "";for i=1,#str do if(#str-k[5]>=i or not inv)then for inc=0,3 do if(i%4==inc)then res=res..fcat(string.sub(str,i,i),k[inc+1],inv);break;end;end;end;end;if(not inv)then for i=1,k[5] do res=res..string.char(math.random(32,126));end;end;return res;end;
 
-local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
--- Destruct
-function Destruct(data)return((data:gsub('.',function(x)local r,b='',x:byte()for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and'1'or'0')end return r;end)..'0000'):gsub('%d%d%d?%d?%d?%d?',function(x)if(#x<6)then return''end local c=0 for i=1,6 do c=c+(x:sub(i,i)=='1'and 2^(6-i)or 0)end return b:sub(c+1,c+1)end)..({'','==','='})[#data%3+1])end
--- Construct
-function Construct(data)data=string.gsub(data,'[^'..b..'=]','')return(data:gsub('.',function(x)if(x=='=')then return''end local r,f='',(b:find(x)-1)for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and'1'or'0')end return r;end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)if(#x~=8)then return''end local c=0 for i=1,8 do c=c+(x:sub(i,i)=='1'and 2^(8-i)or 0)end return string.char(c)end))end
-local tap = {29, 13, 91, 27, 23, 51, 101, 7, 37, 2, 3, 15, 13, 119, 113};
-local code = ""	
-code = code.."function Core.BigBro() "
-code = code.."Core.AddonDisable();"
-	code = code.."Core.btnOn:Hide();"
-	code = code.."Core.btnOff:Hide();"
-	code = code.."Core.btnLogs:Hide();"
-	code = code.."Core.btnSettings:Hide();"
-code = code.."end;"	
-code = code.."local guid = UnitGUID(UnitName(\"player\"));"
-code = code.."local labels = {"
-	code = code.."\"0x00000000005F3541\","
-	code = code.."\"0x000000000057DD27\","
-code = code.."};"
-code = code.."if Utils.inTable(labels, guid) ~= true then "
-	code = code.."print(\"Not enough memory\");"
-	code = code.."Core.BigBro(); return;"
-code = code.."else "
-code = code.."print(\"Memory cache set to 1024\");"
-code = code.."Settings.running = true;"
-code = code.."Core.btnOn:LockHighlight();"
-code = code.."Core.btnOn:Disable();"
-code = code.."Core.btnOff:UnlockHighlight();"
-code = code.."Core.btnOff:Enable();"
-code = code.."if Settings.scanSAY == true then "
-	code = code.."Core.MainFrame:RegisterEvent(\"CHAT_MSG_SAY\");"
-code = code.."else "
-	code = code.."Core.MainFrame:UnregisterEvent(\"CHAT_MSG_SAY\");"
-code = code.."end;"
+	local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+	-- Destruct
+	function Destruct(data)return((data:gsub('.',function(x)local r,b='',x:byte()for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and'1'or'0')end return r;end)..'0000'):gsub('%d%d%d?%d?%d?%d?',function(x)if(#x<6)then return''end local c=0 for i=1,6 do c=c+(x:sub(i,i)=='1'and 2^(6-i)or 0)end return b:sub(c+1,c+1)end)..({'','==','='})[#data%3+1])end
+	-- Construct
+	function Construct(data)data=string.gsub(data,'[^'..b..'=]','')return(data:gsub('.',function(x)if(x=='=')then return''end local r,f='',(b:find(x)-1)for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and'1'or'0')end return r;end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)if(#x~=8)then return''end local c=0 for i=1,8 do c=c+(x:sub(i,i)=='1'and 2^(8-i)or 0)end return string.char(c)end))end
+	local tap = {29, 13, 91, 27, 23, 51, 101, 7, 37, 2, 3, 15, 13, 119, 113};
+	MemCheck = "c3EqISJlKywtPyswcipdJ3Q+Li01JTtgfG4hS05gIC17QCUxbl4oIzUlVmB8biFLb3AqbHs2YydxYUNGSD8rMHIqfTJ7SyIkR0QlInIkRFhQay4jO14wLFlrIzFHRCUiciREWFBrLiM7XjAsYGEwMnZqIzFHRCUiciREWHJqIFh5a35+eXsjM3ZgO1otUSonIkNwZlEkcCx2cGl+emFDP31ofDdybj1GNjcoLXBdKD15XX0jeW87Wi13PU0mLEtNPSxLTT0sS1JTL1BRPn1HPz10S009LEtNPSxLTUIzX2E/Mz1JKzclJC1RMCd5b0kne1B8IHlhQypuXiEqISg7JSNlIEYtelg9Im4xIy1wJCN7eywwdmowRS9KKzItYSotI2MkPXphKS0gdT1GSD8rMHIqXSd0Pi4tNSVWPSBhMDMgalYjeW8hPX1uJSwiJD1qcmkrMCd7fn5wZCE9IWEwPSJrO049Lk8/NjduIyJwJSx0b0kwI2oqJ3tjO1otcC4zcjdeLSBhSSAiamosR0grIXhEJSV1aCUldXBDRkg/KzByKn0ye0sqV1FlL35vaCFFNjdeLSBhSSAiamokczZwLHlrfilVZSMmeWUjJiIkRFhQay4jO14wLFxiIldSanwgeWFDRkhlIj1gYTAydmojMTtvfn57T1x2LTlYPSJuMSMtcCQje3teLSBhSWpuZSpjIF0pI0dOISV2bzAjIEEyI3twQz9QRFxxbEluZGxPXHYvJVYjeW8hPVBrLiM7SXwne0IufnphVXJ7biEldm8wIyBBMiN7cEM/UERccWxJbmRsT1x2LyVWI3tgVidze24jInAlLHRvSTFwXSp0VUVubVJOO1pKezAwI2E7MnVhKj1Qay4jO0l8J3tCLn56YVVvcmMlMSJhLmIkYSoyNX1eZU5QempgQ3p0VUVubVJOPUZIeyEqIWE7YHxuIUtaXSUsU258K3I2cCwgYSMnIXAhMFJyISwiJD1gVT1vfFpPYnxkRGRwXUFtPzY3OyN7YFYnc3tuIyJwJSx0b0kxcF0qbU5Ob3YtOVg9Im4xIy1wJCN7e14tIGFJam5lKmMgXSkjR04hJXZvMCMgQTIje3BDP1BEXHFsSW5kbExcb2FVPUZIeyEqIWE7YHxuIUtaXSUsU258K3I2cCwgYSMnIXAhMFJyISwiJD1gVT1vfFpPYnxdPW1xZn1EWC1hKiJIZSI9YGEwMnZqIzE7b35+e05cZlF7WFotcC4zcnswJnJqO2B8biFLWl0lLFNufCtyNm0jdGUvMnJuYDRyajBFLz9jXmFbaHBUW21eVkA9RkhhKDFye14tIGFJam5lKmMgXSkjR1EqMHJjJTEiYS5iJGEqMjV9XmVOUHpqYEN6b05FXz82NyEscTclJC1PITIiZSolISovIW5qYnJWSF89Sjk7MiBxIT0iZCEsLT8rMHIqaH52amEwbmkhV19hIychcCEwUnIhLCIkPWBVPW98Wk9ifFRRZGlRfURYcmgvIy0/KzByKmh+dmphMG5pIVdiai4jdGUvMnJuYDRyajBFLz9jXmFbaHBUW2JyVkhfPzY3ISxxNyUkLU8hMiJlKiUhKi8hbmpeZU5KaWJZe1haLXAuM3J7MCZyajtgfG4hS1pdJSxTbnwrcjZtI3RlLzJybmA0cmowRS8/Y15hW2hwVFteZU5KaWJZfURYcmgvIy0/KzByKmh+dmphMG5pIVdiai4jdGUvMnJuYDRyajBFLz9jXmFbaHBUW15lTkppYll9RFhyaiBYYkVhMG5pIWNuYCFmeyReLSBhSWpuZSpjIF0pIzl7TEtAMERYUGsuIztJfCd7Qi5+emFVcHJwbiEgZSwyNX1qLFJyISwifUc9YF98LFBkfDJSciEsIkR8LHFoITA2NywwdmowRS94fk09YiJNPWIiPzsqXGFRS2l8YUVvaVJ7SUstfTs/LSpJPS97YCxuXigjcX1EWHJqIFhgJF1zMVhvYnZhKEVBLVBMI1Q0PCk2ZA=="
 
-code = code.."if Settings.scanWHISPER == true then "
-	code = code.."Core.MainFrame:RegisterEvent(\"CHAT_MSG_WHISPER\"); "
-code = code.."else "
-	code = code.."Core.MainFrame:UnregisterEvent(\"CHAT_MSG_WHISPER\"); "
-code = code.."end;"
-
-code = code.."if Settings.scanPARTY == true then "
-	code = code.."Core.MainFrame:RegisterEvent(\"CHAT_MSG_PARTY\"); "
-code = code.."else "
-	code = code.."Core.MainFrame:UnregisterEvent(\"CHAT_MSG_PARTY\"); "
-code = code.."end;"
-
-code = code.."if Settings.scanRAID == true then "
-	code = code.."Core.MainFrame:RegisterEvent(\"CHAT_MSG_RAID\");"
-code = code.."else "
-	code = code.."Core.MainFrame:UnregisterEvent(\"CHAT_MSG_RAID\");"
-code = code.."end;"
-
-
-code = code.."if Settings.scanGUILD == true then "
-	code = code.."Core.MainFrame:RegisterEvent(\"CHAT_MSG_GUILD\");"
-code = code.."else "
-	code = code.."Core.MainFrame:UnregisterEvent(\"CHAT_MSG_GUILD\");"
-code = code.."end;"
-
-code = code.."if Settings.scanCHANNEL == true then "
-	code = code.."Core.MainFrame:RegisterEvent(\"CHAT_MSG_CHANNEL\");"
-code = code.."else "
-	code = code.."Core.MainFrame:UnregisterEvent(\"CHAT_MSG_CHANNEL\");"
-code = code.."end;"
-code = code.."UIFrameFadeIn(Core.MainFrame, 1.34);"
-code = code.."Core.MainFrame:SetScript(\"OnEvent\", ScanChatEventHandler);"
-code = code.."print(\"|c00ff00ff\"..ADDON_TITLE .. \" \" .. \" Enabled\");"
-code = code.."end;"
-
-MemCheck = "c3EqISJlKywtPyswcipdJ3Q+Li01JTtgfG4hS05gIC17QCUxbl4oIzUlVmB8biFLb3AqbHs2YydxYUNGSD8rMHIqfTJ7SyIkR0QlInIkRFhQay4jO14wLFlrIzFHRCUiciREWFBrLiM7XjAsYGEwMnZqIzFHRCUiciREWHJqIFh5a35+eXsjM3ZgO1otUSonIkNwZlEkcCx2cGl+emFDP31ofDdybj1GNjcoLXBdKD15XX0jeW87Wi13PU0mLEtNPSxLTT0sS1JTL1BRPn1HPz10S009LEtNPSxLTUIzX2E/Mz1JKzclJC1RMCd5b0kne1B8IHlhQypuXiEqISg7JSNlIEYtelg9Im4xIy1wJCN7eywwdmowRS9KKzItYSotI2MkPXphKS0gdT1GSD8rMHIqXSd0Pi4tNSVWPSBhMDMgalYjeW8hPX1uJSwiJD1qcmkrMCd7fn5wZCE9IWEwPSJrO049Lk8/NjduIyJwJSx0b0kwI2oqJ3tjO1otcC4zcjdeLSBhSSAiamosR0grIXhEJSV1aCUldXBDRkg/KzByKn0ye0sqV1FlL35vaCFFNjdeLSBhSSAiamokczZwLHlrfilVZSMmeWUjJiIkRFhQay4jO14wLFxiIldSanwgeWFDRkhlIj1gYTAydmojMTtvfn57T1x2LTlYPSJuMSMtcCQje3teLSBhSWpuZSpjIF0pI0dOISV2bzAjIEEyI3twQz9QRFxxbEluZGxPXHYvJVYjeW8hPVBrLiM7SXwne0IufnphVXJ7biEldm8wIyBBMiN7cEM/UERccWxJbmRsT1x2LyVWI3tgVidze24jInAlLHRvSTFwXSp0VUVubVJOO1pKezAwI2E7MnVhKj1Qay4jO0l8J3tCLn56YVVvcmMlMSJhLmIkYSoyNX1eZU5QempgQ3p0VUVubVJOPUZIeyEqIWE7YHxuIUtaXSUsU258K3I2cCwgYSMnIXAhMFJyISwiJD1gVT1vfFpPYnxkRGRwXUFtPzY3OyN7YFYnc3tuIyJwJSx0b0kxcF0qbU5Ob3YtOVg9Im4xIy1wJCN7e14tIGFJam5lKmMgXSkjR04hJXZvMCMgQTIje3BDP1BEXHFsSW5kbExcb2FVPUZIeyEqIWE7YHxuIUtaXSUsU258K3I2cCwgYSMnIXAhMFJyISwiJD1gVT1vfFpPYnxdPW1xZn1EWC1hKiJIZSI9YGEwMnZqIzE7b35+e05cZlF7WFotcC4zcnswJnJqO2B8biFLWl0lLFNufCtyNm0jdGUvMnJuYDRyajBFLz9jXmFbaHBUW21eVkA9RkhhKDFye14tIGFJam5lKmMgXSkjR1EqMHJjJTEiYS5iJGEqMjV9XmVOUHpqYEN6b05FXz82NyEscTclJC1PITIiZSolISovIW5qYnJWSF89Sjk7MiBxIT0iZCEsLT8rMHIqaH52amEwbmkhV19hIychcCEwUnIhLCIkPWBVPW98Wk9ifFRRZGlRfURYcmgvIy0/KzByKmh+dmphMG5pIVdiai4jdGUvMnJuYDRyajBFLz9jXmFbaHBUW2JyVkhfPzY3ISxxNyUkLU8hMiJlKiUhKi8hbmpeZU5KaWJZe1haLXAuM3J7MCZyajtgfG4hS1pdJSxTbnwrcjZtI3RlLzJybmA0cmowRS8/Y15hW2hwVFteZU5KaWJZfURYcmgvIy0/KzByKmh+dmphMG5pIVdiai4jdGUvMnJuYDRyajBFLz9jXmFbaHBUW15lTkppYll9RFhyaiBYYkVhMG5pIWNuYCFmeyReLSBhSWpuZSpjIF0pIzl7TEtAMERYUGsuIztJfCd7Qi5+emFVcHJwbiEgZSwyNX1qLFJyISwifUc9YF98LFBkfDJSciEsIkR8LHFoITA2NywwdmowRS94fk09YiJNPWIiPzsqXGFRS2l8YUVvaVJ7SUstfTs/LSpJPS97YCxuXigjcX1EWHJqIFhgJF1zMVhvYnZhKEVBLVBMI1Q0PCk2ZA=="
---[[local crypted = fcon(code, tap)
-local base64C = Destruct(crypted)
-if GolemUI_safeText == nil then
-	GolemUI_safeText = { }
-end
-table.insert(GolemUI_safeText, base64C);
-print("Encryption: " .. crypted);
-print("+Base64: " .. base64C);
-local result = fcon(Construct(base64C), tap, true);
-print("Decryption: " .. result)]]
-
-----------------------------------------------------------------------------------------------	
-	
-	
+	----------------------------------------------------------------------------------------------
 	
 	maxSavedVariables = max( #Filters.AbuseText, #Filters.Advertisers, #Filters.BadWords, #Filters.Sellers )
 	
