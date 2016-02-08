@@ -1,12 +1,11 @@
 ﻿## Interface: 60000
 ## Title: Golem
-## Version: 0.1beta
+## Version: 2.0
 ## Notes: GM helper
 ## Author: eXetrum
-## SavedVariables: GolemUI_antiSpamDB
+## SavedVariables: GolemUI_antiSpamDB, GolemUI_safeText
 ## DefaultState: enabled
 
 localization.en.lua
-GolemUI_Antispam.lua
 GolemUI.xml
 GolemUI.lua

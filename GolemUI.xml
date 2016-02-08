@@ -27,6 +27,11 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 				self:SetAttribute("selected", false)
 				self:SetAttribute("username", "USER_NAME")
 				
+				self:SetAttribute("filter", false)
+				self:SetAttribute("filter_name", "FILTER_NAME")
+				
+				self:SetAttribute("removeID", nil)
+				
 				self:RegisterForClicks(
 					"LeftButtonUp",
 					"RightButtonUp",
@@ -34,17 +39,14 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 				)
 			</OnLoad>
 			<OnClick>
-				print("Clicked", button, ", id = " .. self:GetName())
+				print("Clickedd", button, ", id = " .. self:GetName())
 				PlaySound("igMainMenuOptionCheckBoxOn")
 				--self:Disable()
 				--self:GetPushedTexture()
 				--self:SetButtonState("PUSHED")
 				--self:LockHighlight()
 				SelectButton(self)
-			</OnClick>
-			<OnUpdate>
-				--update(self, elapsed)
-			</OnUpdate>			
+			</OnClick>		
 		</Scripts>
 	</Button>
 	
@@ -73,7 +75,7 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 				)
 				getglobal(self:GetName().."BG"):SetVertexColor(1, 1, 1, 0.5)
 				getglobal(self:GetName().."Text"):SetWordWrap("enable")
-				--getglobal(self:GetName().."Text"):SetText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+				--getglobal(self:GetName().."Text"):SetText("test");
 				--print("STRING HEIGHT: "..getglobal(self:GetName().."Text"):GetStringHeight())
 				--print("STRING Width: "..getglobal(self:GetName().."Text"):GetStringWidth())				
 			</OnLoad>
@@ -162,22 +164,45 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 				</FontString>
 			</Layer>
 		</Layers>
+		
+		
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Gold-Background" tile="true"
+		edgeFile="Interface\DialogFrame\UI-DialogBox-Gold-Border">
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+		</Backdrop>
+		
 	</Frame>
 	
 	
 
-	<Frame name="GolemUI_Main_Frame" parent="UIParent" movable="true" enableMouse="true" clampedToScreen="true" >
+	<Frame name="GolemUI_Main_Frame" virtual="true" parent="UIParent" movable="true" enableMouse="true" clampedToScreen="true" >
 		<Scripts>
 			<OnLoad>
-				self:RegisterForDrag("LeftButton")
-				self:SetUserPlaced(1)
+				self:RegisterForDrag("LeftButton");
+				self:SetUserPlaced(1);
+				--tinsert(UISpecialFrames, self:GetName());
+				self:Show();
 			</OnLoad>
 			<OnDragStart>
-				self:StartMoving()
+				self:StartMoving();
 			</OnDragStart>
 			<OnDragStop>
-				self:StopMovingOrSizing()
+				self:StopMovingOrSizing();
 			</OnDragStop>
+			<OnShow>
+				PlaySound("igCharacterInfoOpen");
+			</OnShow>
+			<OnHide>
+				PlaySound("igCharacterInfoClose");
+			</OnHide>
 		</Scripts>
 		<Anchors>
 			<Anchor point="RIGHT" relativePoint="RIGHT">
@@ -187,38 +212,40 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 			</Anchor>
 		</Anchors>
 		<Size>
-			<AbsDimension x="220" y="310" />
+			<AbsDimension x="190" y="140" />
 		</Size>
+		
+
 		<Layers>
 			<Layer level="ARTWORK" parent="GolemUI_Main_Frame">
-				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
+				<Texture name="$parentTexture" file="Interface\DialogFrame\UI-DialogBox-Header">
 					<Size>
-						<AbsDimension x="300" y="60"/>
+						<AbsDimension x="260" y="61"/>
 					</Size>
 					<Anchors>
 						<Anchor point="TOP">
 							<Offset>
-								<AbsDimension x="0" y="10" />
+								<AbsDimension x="0" y="12" />
 							</Offset>
 						</Anchor>
 					</Anchors>
 				</Texture>
-				<FontString inherits="GameFontNormal" text="ADDON_TITLE">
+				<FontString name="$parentTitle" inherits="GameFontNormal" text="ADDON_TITLE">
 					<Anchors>
-						<Anchor point="TOP" relativeTo="$parentTitle">
+						<Anchor point="TOP" relativeTo="$parentTexture">
 							<Offset>
 								<AbsDimension x="0" y="-13" />
 							</Offset>
 						</Anchor>
 					</Anchors>
 				</FontString>
-			</Layer>
+			</Layer>		
 		</Layers>
 		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"
 		edgeFile="Interface\DialogFrame\UI-DialogBox-Border">
-			<TitleSize>
+			<TileSize>
 				<AbsValue val="32" />
-			</TitleSize>
+			</TileSize>
 			<EdgeSize>
 				<AbsValue val="32" />
 			</EdgeSize>
@@ -228,13 +255,6 @@ xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
 		</Backdrop>		
 		
 		
-		
-		
-		
-		
-		
-	
-		
-		
 	</Frame>
+	
 </Ui>

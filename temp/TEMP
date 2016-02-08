@@ -1,0 +1,616 @@
+-- Lorelle
+-- 160530
+-- Kotblky2
+-- 312478qwerty
+
+--rain1990
+--porallon
+
+
+
+--GolemUI_antiSpamDB = GolemUI_antiSpamDB or {}
+--local test = GolemUI_antiSpamDB
+--for k, v in pairs(test) do
+--	print(k, ' ', v)
+--end
+
+--local test = GolemUI_antiSpamDB-- or {}
+--print(test)
+
+
+
+--if(#GolemUI_antiSpamDB == 0 or GolemUI_antiSpamDB == nil) then
+--	print("Anti spam rules not found")
+--end
+--local antispam = GolemUI_antiSpamDB--_G["Antispam"]
+--settings = GolemUI_antiSpamDB
+--for var,value in pairs(defaults) do
+--settings[var] = settings[var]==nil and value or settings[var]
+--end
+
+
+local sound = {
+	-- "Сгииинь, в вечных муках"
+	"Sound\\Creature\\LordMarrowgar\\IC_Marrowgar_Slay02.wav",
+	-- "Кости, для жертвоприношений"
+	"Sound\\Creature\\LordMarrowgar\\IC_Marrowgar_Slay01.wav",
+	
+	"Sound\\creature\\CardinalDeathwhisper\\IC_Deathwhisper_Slay01.wav",
+	"Sound\\creature\\CardinalDeathwhisper\\IC_Deathwhisper_Slay02.wav",
+	
+	"Sound\\Creature\\LichKing\\IC_Lich King_Slay01.wav",
+	"Sound\\Creature\\LichKing\\IC_Lich King_Slay02.wav",	
+	-- "Ничтожество"
+	"Sound/Creature/Illidan/BLACK_Illidan_09.wav",
+	-- "Ненависть десяти тысяч лет"
+	"Sound/Creature/Illidan/BLACK_Illidan_08.wav",
+	-- "Сила истинного демона"
+	"Sound/Creature/Illidan/BLACK_Illidan_13.wav",
+	-- "Вы не готовы"
+	"Sound/Creature/Illidan/BLACK_Illidan_04.wav",
+}
+
+local function chsize(char)
+    if not char then
+        return 0
+    elseif char > 240 then
+        return 4
+    elseif char > 225 then
+        return 3
+    elseif char > 192 then
+        return 2
+    else
+        return 1
+    end
+end
+
+local function utf8sub(str, startChar, numChars)
+  local startIndex = 1
+  while startChar > 1 do
+      local char = string.byte(str, startIndex)
+      startIndex = startIndex + chsize(char)
+      startChar = startChar - 1
+  end
+ 
+  local currentIndex = startIndex
+ 
+  while numChars > 0 and currentIndex <= #str do
+    local char = string.byte(str, currentIndex)
+    currentIndex = currentIndex + chsize(char)
+    numChars = numChars -1
+  end
+  return str:sub(startIndex, currentIndex - 1)
+end
+
+function utf8split(str)
+ local utf8table = {}
+ str:gsub("([^\128-\191][\128-\191]*)",function(char) 
+ local leadbyte = strbyte(char, 1)
+ local length = -1
+ 
+ if leadbyte < 248 then
+ if leadbyte >= 240 then length = 4
+ elseif leadbyte >= 224 then length = 3
+ elseif leadbyte >= 192 then length = 2
+ elseif leadbyte < 128 then length = 1
+ end
+ end
+
+ tinsert(utf8table, (length == #char) and char)
+ end)
+ return utf8table
+end
+function inTable(t, s)
+	for k, v in pairs(t) do
+		if v == s then return true end
+	end
+	return false
+end
+mask = utf8split("abcdefghijklmnopqrstuvwxyzrабвгдеёжзийклмнопрстуфхцчшщъьыэюяABCDEFGHIJKLMNOPQRSTUVWXYZRАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЫЭЮЯ")
+
+function utf8find(str, ch, k)
+
+	k = k or 1
+	
+	for i = k, strlenutf8(str) do
+		local si = utf8sub(str, i, 1)
+		if strbyte(si) == strbyte(ch) then return i end
+	end	
+	return nil
+end
+
+local function IsCaps(str)
+	local sz = strlenutf8(str)
+	if sz < CAPS_MIN_MSG_LEN then return false end
+	local c = 0
+	local n = 0
+	for i = 1, sz do
+		s = utf8sub(str, i, 1 );
+		u = string.upper(s)			
+		if inTable(mask, s) then
+			n = n + 1
+			if s == u then c = c + 1 end
+		end
+	end
+	return (c / n * 100) >= CAPS_PERCENT, c, n
+end
+
+local function ContainBadWords(message)
+	for word in string.gmatch(message, "[1234567890abcdefghijklmnopqrstuvwxyzrабвгдеёжзийклмнопрстуфхцчшщъьыэюяABCDEFGHIJKLMNOPQRSTUVWXYZRАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЬЫЭЮЯ]+") do
+		if inTable(Antispam.BadWords, string.lower(word)) then return true, word end
+	end
+	return false, nil
+end
+-- Тестовая функция определения возможности построения заданного слова из набора символов сообщения
+function CanConstruct(message, word)	
+	for i = 1, #Antispam.replaceTable do
+		message = string.gsub(message, Antispam.replaceTable[i], " ")
+	end
+	
+	msgSize = strlenutf8(message)
+	wordSize = strlenutf8(word)
+	if msgSize < wordSize then return false end
+	
+	--msgTable = utf8split(message)
+	local k = 1
+	local pos = -1
+	for i = 1, wordSize do
+		s = utf8sub(word, i, 1)
+		--print(i.." " .. s)
+		--pos = string.find(message, s, k)
+		pos = utf8find(message, s, k)
+		
+		--print("s: [" ..s.. "] k: ".. k.. " pos: " .. tostring(pos))
+		
+		if (pos == nil) or (pos < k) then return false end
+		--local n = pos - k - 1
+		--local sep = utf8sub(message, k + 1, n)
+		--items = utf8split( sep )
+		--flags = {}
+		--local unique_chars = 0
+		--local unique_mask_chars = 0
+		--for j = 1, #items do
+		--	if not flags[items[j]] then
+		--		flags[items[j]] = true
+		--		if inTable(mask, items[j]) then unique_mask_chars = unique_mask_chars + 1 end
+		--		unique_chars = unique_chars + 1
+		--	end
+		--end
+		
+		--print("char: ["..s.."], sep: " .. sep .. ", unique_chars: " .. unique_chars.. ", unique_mask_chars: " .. unique_mask_chars)
+		--print("separator chars: " .. utf8sub(message, k + 1, n))--tostring(pos - k - 1))
+		
+		--if unique_mask_chars > COMPOUND_SENSETIVITY then return false end
+		k = pos
+	end
+	return true
+end
+
+function MessageCheck(usr)
+	text = usr.messages[usr.msg_count].msg
+	for i = 1, #Antispam.replaceTable do
+		text = string.gsub(text, Antispam.replaceTable[i], "")
+	end
+	--print(text)
+	-- Prodavci
+	for i, seller in pairs(Antispam.Sellers) do
+		--if CanConstruct(msg, v) then
+		if string.find(text, seller) ~= nil then
+			Screenshot();
+			PlaySoundFile(sound[math.random(1, #sound)])
+			print("|c00ff0000 [Seller detected] |r")
+			print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+			SendChatMessage(string.format(Antispam.PunishOptions["prod.gold"], usr.frame.username), "SAY", nil, nil);
+			return;
+		end
+	end
+	-- Reklama
+	for i, advertiser in pairs(Antispam.Advertisers) do
+		--if CanConstruct(msg, v) then
+		if string.find(text, advertiser) ~= nil then
+			Screenshot();
+			PlaySoundFile(sound[math.random(1, #sound)])
+			print("|c00ff0000 [Advertiser detected] |r")
+			print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+			SendChatMessage(string.format(Antispam.PunishOptions["reklama"], usr.frame.username), "SAY", nil, nil);				
+			return;
+		end
+	end
+	-- Polnoe predlojenie
+	for i, j in pairs(Antispam.AbuseText) do
+		if usr.messages[usr.msg_count].msg == j then
+			Screenshot();
+			PlaySoundFile(sound[math.random(1, #sound)])
+			print("|c00ff0000 [AbuseText detected] |r")
+			print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))				
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			SendChatMessage(".ban pla "..usr.frame.username.." 30d komm.d", "SAY", nil, nil);		
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------
+			---------------------------------------------------------------------------------------------			
+			--SendChatMessage(string.format(Antispam.PunishOptions["reklama"], usr.frame.username), "SAY", nil, nil);				
+			return;
+		end
+	end
+	
+	-- Проверяем на капс
+	caps, c, n = IsCaps(usr.messages[usr.msg_count].msg)
+	-- Проверяем на содержание запрещенных слов
+	mat, w = ContainBadWords(usr.messages[usr.msg_count].msg)	
+	
+	if caps and mat then
+		Screenshot();
+		PlaySoundFile(sound[math.random(1, #sound)])
+		print("|c00ff0000 [CAPS + MAT] detected |r")
+		print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))
+		print(string.format("|c0000ff00 %-17s:|r|c000000ff %-32s|r", "Total len", n))
+		print(string.format("|c0000ff00 %-16s:|r|c000000ff %-32s|r", "Capitalized", c))
+		print(string.format("|c0000ff00 %-13s:|r|c000000ff %-32s|r", "CAPS percent", (c / n * 100)))
+		print(string.format("|c0000ff00 %-18s:|r|c00ff0000 %-32s|r", "MAT", w))
+		SendChatMessage(string.format(Antispam.PunishOptions["caps+mat"], usr.frame.username), "SAY", nil, nil);						
+		--SendChatMessage(string.format(Antispam.PunishOptions["caps+mat"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+		return;
+	end
+	if caps then
+		Screenshot();
+		PlaySoundFile(sound[math.random(1, #sound)])
+		print("|c00ff0000 [CAPS] detected |r")
+		print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))
+		print(string.format("|c0000ff00 %-17s:|r|c000000ff %-32s|r", "Total len", n))
+		print(string.format("|c0000ff00 %-16s:|r|c000000ff %-32s|r", "Capitalized", c))
+		print(string.format("|c0000ff00 %-13s:|r|c000000ff %-32s|r", "CAPS percent", (c / n * 100)))
+		SendChatMessage(string.format(Antispam.PunishOptions["caps"], usr.frame.username), "SAY", nil, nil);		
+		--SendChatMessage(string.format(Antispam.PunishOptions["caps"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+		return;
+	end
+	if mat then
+		Screenshot();
+		PlaySoundFile(sound[math.random(1, #sound)])
+		print("|c00ff0000 [MAT] detected |r")
+		print(string.format("|c0000ff00 %-22s:|r|c000000ff %-32s|r", "Игрок", usr.frame.username))
+		print(string.format("|c0000ff00 %-17s:|r|c00ff0000 %-32s|r", "MAT", w))
+		SendChatMessage(string.format(Antispam.PunishOptions["mat"], usr.frame.username), "SAY", nil, nil);		
+		--SendChatMessage(string.format(Antispam.PunishOptions["mat"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+		return
+	end
+	-- Секция проверки флуда
+	if usr.msg_count < 3 then return end
+	
+	if (usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec ) < MAX_MSG_TIME and
+		usr.messages[usr.msg_count].msg == usr.messages[usr.msg_count - 1].msg and
+		usr.messages[usr.msg_count].msg == usr.messages[usr.msg_count - 2].msg then
+		
+		Screenshot();
+		PlaySoundFile(sound[math.random(1, #sound)])
+		--TakeScreenshot();
+		--isConnected = UnitIsConnected("unit")		
+		local sz = usr.msg_count;
+		local m = usr.messages;
+		
+		print("|c00ff0000 [flood detected] |r")
+		print("|c0000ff00 Игрок: |r|c000000ff"..usr.frame.username.."|r")
+		print("|c0000ff00 Время между сообщениями: "..(usr.messages[usr.msg_count].sec - usr.messages[usr.msg_count - 2].sec).."|r" )		
+		print("|c00ff0000 Лог сообщений: |r")
+		print("|c00ff0000 ["..m[sz - 2].sec.."]["..m[sz - 2].timestamp.."]"..m[sz - 2].msg.."|r")
+		print("|c00ff0000 ["..m[sz - 1].sec.."]["..m[sz - 1].timestamp.."]"..m[sz - 1].msg.."|r")
+		print("|c00ff0000 ["..m[sz].sec.."]["..m[sz].timestamp.."]"..m[sz].msg.."|r")
+		
+		SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "SAY", nil, nil);		
+		--SendChatMessage(string.format(Antispam.PunishOptions["flood"], usr.frame.username), "CHANNEL", nil, GetChannelName("all"));
+	end
+end
+
+
+
+print("|c0000ff00 Hello " .. UnitName("player") .. "|r");
+
+GolemUI_Main_Frame:SetFrameStrata("DIALOG")
+
+local users = {}
+local userID = 0
+
+local timer = 5
+
+local eventHandlers = {}
+local maxMessages = 0
+local messageFrames = {}
+
+local statusFrame = CreateFrame("Frame", "Entry_Status", GolemUI_Main_Frame, "TitleTemplate")
+statusFrame:SetPoint("TOPLEFT", GolemUI_Main_Frame, "TOPRIGHT", -640, 0)
+statusFrame:SetPoint("BOTTOMLEFT", GolemUI_Main_Frame, "BOTTOMRIGHT", -400, 0)
+statusFrame:SetWidth(400)
+statusFrame:Hide()
+--scrollframe
+scrollframe = CreateFrame("ScrollFrame", nil, statusFrame)
+scrollframe:SetPoint("TOPLEFT", statusFrame, "TOPLEFT", 12, -12)
+--scrollframe:SetPoint("BOTTOMRIGHT", statusFrame, "BOTTOMRIGHT", 0, 1)
+scrollframe:SetWidth(376)
+scrollframe:SetHeight(287)
+--local texture = scrollframe:CreateTexture()
+--texture:SetAllPoints()
+--texture:SetTexture(.5,.5,.5,1)
+--scrollframe.texture = texture
+--scrollframe:SetBackdrop(backdrop)
+statusFrame.scrollframe = scrollframe
+
+--scrollbar
+scrollbar = CreateFrame("Slider", "GolemUI_Message_List_ScrollBar", scrollframe, "UIPanelScrollBarTemplate")
+scrollbar:SetPoint("TOPLEFT", statusFrame, "TOPRIGHT", 4, -16)
+scrollbar:SetPoint("BOTTOMLEFT", statusFrame, "BOTTOMRIGHT", 4, 16)
+scrollbar:SetMinMaxValues(1, 1)
+scrollbar:SetValueStep(1)
+scrollbar.scrollStep = 1
+scrollbar:SetValue(0)
+scrollbar:SetWidth(16)
+scrollbar:SetScript("OnValueChanged",
+function (self, value)
+	local n = value % MESSAGE_BTN_SIZE;
+	self:GetParent():SetVerticalScroll(value)--n * 25)
+end)
+local scrollbg = scrollbar:CreateTexture(nil, "BACKGROUND")
+scrollbg:SetAllPoints(scrollbar)
+scrollbg:SetTexture(0, 0, 0, 0.4)
+statusFrame.scrollbar = scrollbar
+--content frame
+local content = CreateFrame("Frame", "GolemUI_Message_List", scrollframe, "ListScrollFrameTemplate")
+content:SetPoint("TOPLEFT", scrollframe, "TOPLEFT", 10, 0)
+content:SetWidth(376)
+content:SetHeight(287)
+scrollframe.content = content
+scrollframe:SetScrollChild(content) 
+
+
+function mysplit(inputstr, sep)
+	if sep == nil then
+			sep = "%s"
+	end
+	local t={} ; i=1
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+			t[i] = str
+			i = i + 1
+	end
+	return t
+end
+
+
+function OnShowFrame(self)
+	print("ALARM")
+	local user_entry = nil
+	for k, v in pairs(users) do	
+		if v.frame.selected then
+			user_entry = v
+		end
+	end	
+	
+	print("USER: "..user_entry.frame.username..", MSG_COUNT: "..user_entry.msg_count)
+	if user_entry ~= nil then
+		
+		for k, v in pairs(user_entry.messages) do
+			--print (k, v.msg, v.time)
+		end
+	end
+	
+end
+
+function SelectButton(self, ...)
+	if self.selected == true then
+		--print("DESELECT NOW")
+		self:UnlockHighlight()
+		self.selected = false
+		statusFrame:Hide()
+	else
+		--print("SELECT")
+		print("FRAME COUNT: "..#messageFrames)
+		print("SELECTED USER: "..self.username..", MSG_COUNT: "..users[self.username].msg_count)
+		
+		if users[self.username].msg_count > 6 then
+			GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, users[self.username].msg_count * MESSAGE_BTN_SIZE - 287)
+		else
+			GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, 0)
+		end
+		
+		for i = 1, #messageFrames do
+			messageFrames[i]:Hide()
+		end
+		
+		
+		
+		for k,v in pairs(users[self.username].messages) do
+			--print (k, v.msg, v.time)
+			-- Split messsage into words
+			local words = mysplit(v.msg)
+			local s = "["..v.sec.."]|c00ff0000[" .. v.timestamp .. "]|r "..v.msg
+			getglobal(messageFrames[k]:GetName().."Text"):SetText(s)
+			messageFrames[k]:Show()
+			--getglobal(GolemUI_Message_List_Message_..i):Hide()
+		end
+		
+		
+		local u = nil
+		
+		for k, v in pairs(users) do	
+			v.frame:UnlockHighlight()
+			v.frame.selected = false
+		end	
+		self:LockHighlight()
+		self.selected = true
+		
+		getglobal(Entry_Status:GetName().."Text"):SetText(self.username)
+		statusFrame:Show()
+	end	
+end
+
+function RefreshStatusFrame(sender)
+	if users[sender].msg_count > 6 then
+		GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, (users[sender].msg_count - 1) * MESSAGE_BTN_SIZE - 287)
+	else
+		GolemUI_Message_List_ScrollBar:SetMinMaxValues(0, 0)
+	end
+	local u = users[sender]
+	local s = "["..u.messages[u.msg_count].sec.."]|c00ff0000[" .. u.messages[u.msg_count].timestamp .. "]|r "..u.messages[u.msg_count].msg
+	getglobal(messageFrames[u.msg_count]:GetName().."Text"):SetText(s)
+	messageFrames[u.msg_count]:Show()
+end
+
+
+function eventHandlers.CHAT_MSG_SAY(msg, sender, ...)
+	Logs(msg, sender, ...)
+end
+
+function eventHandlers.CHAT_MSG_CHANNEL(msg, sender, ...)
+	Logs(msg, sender, ...)
+end
+
+
+function eventHandlers.CHAT_MSG_WHISPER(msg, sender, ...)
+	Logs(msg, sender, ...)
+end
+
+
+
+--GolemUI_Main_Frame:RegisterEvent("UI_ERROR_MESSAGE")
+--GolemUI_Main_Frame:RegisterEvent("UI_INFO_MESSAGE")
+
+
+
+function Logs(msg, sender, ...)
+	-- Не будем вести логов на самого себя
+	if sender == UnitName("player") then
+		--return
+	end
+	-- Если юзер еще не добавлен в таблицу наблюдений
+	if users[sender] == nil then
+		-- Создаем таблицу - упаковку для данных пользователя
+		local u = {...}		
+		-- Запишем индекс пользователя
+		u.ID = userID
+		-- Таблица сообщений текущего пользователя
+		u.messages = {}
+		-- Т.к. запись только создается - сообщение для записи единственное
+		u.msg_count = 1
+		-- Создаем таблицу - упаковку для сообщений
+		local m = {...}
+		-- Сохраняем сообщение
+		m.msg = msg
+		-- Запишем время возникновения сообщения
+		m.timestamp = date("%d.%m.%y %H:%M:%S")
+		-- Запишем "Точное" время сообщения
+		m.sec = GetTime()
+		-- Создаем фреймы для отображения сообщений
+		if maxMessages == 0 then
+			msgFrame = CreateFrame("Button", "$parent_Message_"..maxMessages, GolemUI_Message_List, "GolemUI_Message_List_Template")
+			msgFrame:SetPoint("TOPLEFT", 0, 0)
+			maxMessages = 1
+			table.insert(messageFrames, msgFrame)				
+		end
+		-- Добавляем сообщение в таблицу сообщений текущего пользователя
+		table.insert(u.messages, m)
+		-- Создаем фрейм - кнопку пользователя
+		u.frame = CreateFrame("Button", "$parent_Entry_"..userID, GolemUI_Entry_List, "GolemUI_Entry_List_Template")
+		-- Задаем ID фрейма
+		u.frame:SetID(userID)
+		-- Запоминаем ник
+		u.frame.username = sender
+		-- Если пользователь первый в списке
+		if userID == 0 then
+			-- Присоединяем фрейм к родительскому
+			u.frame:SetPoint("TOPLEFT", GolemUI_Entry_List, "TOPLEFT", 0, 0)			
+		else
+			-- Иначе присоединяем к предыдущему фрейму (вниз)
+			u.frame:SetPoint("TOPLEFT", "$parent_Entry_"..(userID - 1), "BOTTOMLEFT", 0, 0)			
+		end
+		-- Задаем текст кнопки
+		getglobal(u.frame:GetName().."Text"):SetText(userID.. ". "..sender)		
+		-- Реализуем появление фрейма
+		UIFrameFadeIn(u.frame, 1.34);
+		-- Сохраняем пользователя в таблице пользователей
+		users[sender] = u
+		-- Переходим к след. идентификатору
+		userID = userID + 1
+		-- Если открыто окно статистики сообщений
+		if u.frame.selected then
+			-- Обновляем инфу фрейма статистики
+			RefreshStatusFrame(sender)
+		end
+	-- Если пользователь уже есть в таблице - добавляем сообщение к его списку сообщений
+	else
+		-- Увеличиваем количество сообщений
+		users[sender].msg_count = users[sender].msg_count + 1
+		-- Создаем упаковку для сообщения
+		local m = {...}
+		-- Собираем инфу
+		m.msg = msg
+		m.timestamp = date("%d.%m.%y %H:%M:%S")
+		m.sec = GetTime()
+		-- Создаем дополнительный фрейм в окне статистики собщений, если уже созданных не достаточно
+		if users[sender].msg_count > maxMessages then			
+			msgFrame = CreateFrame("Button", "$parent_Message_"..maxMessages, GolemUI_Message_List, "GolemUI_Message_List_Template")
+			msgFrame:SetPoint("TOPLEFT", "$parent_Message_"..(maxMessages - 1), "BOTTOMLEFT", 0, 0)			
+			table.insert(messageFrames, msgFrame)
+			-- Расширяем фрейм родитель
+			if MESSAGE_BTN_SIZE * (GolemUI_Message_List:GetNumChildren() + 1) > GolemUI_Message_List:GetHeight() then
+				GolemUI_Message_List:SetHeight(MESSAGE_BTN_SIZE * GolemUI_Message_List:GetNumChildren())
+			end
+			-- Максимальное количество фреймов теперь равно максимальному количеству сообщений из всех пользователей
+			maxMessages = users[sender].msg_count
+		end
+		-- Добавляем упаклванное сообщение в таблицу сообщений пользователя
+		table.insert(users[sender].messages, m)
+		-- Если открыто окно статистики сообщений
+		if users[sender].frame.selected then
+			-- Обновляем инфу фрейма статистики
+			RefreshStatusFrame(sender)
+		end
+	end
+
+	
+	-- Проверяем и если необходимо - расширяем фрейм отображения кнопок всех пользователей
+	if USER_BTN_SIZE * (GolemUI_Entry_List:GetNumChildren() + 1) > GolemUI_Entry_List:GetHeight() then
+		GolemUI_Entry_List:SetHeight(USER_BTN_SIZE * (GolemUI_Entry_List:GetNumChildren() + 1))
+		if GolemUI_Entry_List:GetNumChildren() > 11 then
+			local n = GolemUI_Main_Frame:GetHeight() % USER_BTN_SIZE;
+			GolemUI_Entry_List_ScrollBar:SetMinMaxValues(0, (GolemUI_Entry_List:GetNumChildren() - n) * USER_BTN_SIZE)
+		end
+	end
+	
+	-- Проверяем сообщение пользователя
+	MessageCheck(users[sender])
+	
+	--table.insert(GolemUI_antiSpamDB, sender)
+	--print(#GolemUI_antiSpamDB)
+	--f = loadfile("GolemUI.lua")
+	
+	
+	--local mycode = "table.insert("..GolemUI_antiSpamDB..", "..sender..")"
+	--f = loadstring("print('test');")
+	--local f = loadstring(mycode)
+	--RunScript(f())
+	--local retExpr = '"Hello " .. UnitName("target")';
+	--RunScript("function My_GetGreeting() return " .. retExpr .. ";end");
+	
+	--for k, v in pairs(GolemUI_antiSpamDB) do
+		--print(k, ' ', v)
+	--end
+	
+end
+
+----------------------------------------------------------
+local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+-- encoding
+function enc(data)return((data:gsub('.',function(x)local r,b='',x:byte()for i=8,1,-1 do r=r..(b%2^i-b%2^(i-1)>0 and'1'or'0')end return r;end)..'0000'):gsub('%d%d%d?%d?%d?%d?',function(x)if(#x<6)then return''end local c=0 for i=1,6 do c=c+(x:sub(i,i)=='1'and 2^(6-i)or 0)end return b:sub(c+1,c+1)end)..({'','==','='})[#data%3+1])end
+-- decoding
+function dec(data)data=string.gsub(data,'[^'..b..'=]','')return(data:gsub('.',function(x)if(x=='=')then return''end local r,f='',(b:find(x)-1)for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and'1'or'0')end return r;end):gsub('%d%d%d?%d?%d?%d?%d?%d?',function(x)if(#x~=8)then return''end local c=0 for i=1,8 do c=c+(x:sub(i,i)=='1'and 2^(8-i)or 0)end return string.char(c)end))end
+
+--local code = 'cHJpbnQoItC/0YDQuNCy0LXRgiDRiNCw0YXRgtC10YDQsNC8Iik=';
+--loadstring(dec(code))()
+--print(dec(enc("привет")))
+
+--ADDON_LOADED
+
+--UIFrameFadeIn(Minimap, 5)
+

@@ -1,0 +1,250 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\FrameXML\UI.xsd">
+
+	<Button name="GolemUI_Entry_List_Template" virtual="true" text="USER_NAME" inherits="UIPanelButtonTemplate">
+		<Size>
+			<AbsDimension x="200" y="25" />
+		</Size>
+		<Layers>
+			<Layer>
+				<FontString name="$parentText" justifyH="LEFT" inherits="GameFontNormalSmall">
+					<Size>
+						<AbsDimension x="180" y="25" />
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="0" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self:SetAttribute("selected", false)
+				self:SetAttribute("username", "USER_NAME")
+				
+				self:RegisterForClicks(
+					"LeftButtonUp",
+					"RightButtonUp",
+					"MiddleButtonDown"
+				)
+			</OnLoad>
+			<OnClick>
+				print("Clicked", button, ", id = " .. self:GetName())
+				PlaySound("igMainMenuOptionCheckBoxOn")
+				--self:Disable()
+				--self:GetPushedTexture()
+				--self:SetButtonState("PUSHED")
+				--self:LockHighlight()
+				--SelectButton(self)
+			</OnClick>
+			<OnUpdate>
+				--update(self, elapsed)
+			</OnUpdate>			
+		</Scripts>
+	</Button>
+	
+	
+	<Button name="GolemUI_Message_List_Template" virtual="true" hidden="true">
+		<Size>
+			<AbsDimension x="376" y="48" />
+		</Size>
+		<Layers>
+			<Layer>
+				<FontString name="$parentText" justifyH="LEFT" inherits="GameFontNormalSmall" text="USER_MSG">
+					<FontHeight val="11" />
+					<Anchors>
+						<Anchor point="TOPLEFT" x="5" y="-5" />						
+						<Anchor point="BOTTOMRIGHT" x="-5" y="5" />	
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>				
+				self:RegisterForClicks(
+					"LeftButtonUp",
+					"RightButtonUp",
+					"MiddleButtonDown"
+				)
+				getglobal(self:GetName().."BG"):SetVertexColor(1, 1, 1, 0.5)
+				getglobal(self:GetName().."Text"):SetWordWrap("enable")
+				--getglobal(self:GetName().."Text"):SetText("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
+				--print("STRING HEIGHT: "..getglobal(self:GetName().."Text"):GetStringHeight())
+				--print("STRING Width: "..getglobal(self:GetName().."Text"):GetStringWidth())				
+			</OnLoad>
+			<OnClick>
+				print("Clicked", button, ", id = " .. self:GetName())
+				PlaySound("igMainMenuOptionCheckBoxOn")
+				--self:Disable()
+				--self:GetPushedTexture()
+				--self:SetButtonState("PUSHED")
+				--self:LockHighlight()
+				--SelectButton(self)
+			</OnClick>
+			
+			<OnEnter>
+				getglobal(self:GetName().."BG"):SetVertexColor(1, 1, 1, 1)
+			</OnEnter>
+			<OnLeave>
+				getglobal(self:GetName().."BG"):SetVertexColor(1, 1, 1, 0.5)
+			</OnLeave>
+			
+			<OnUpdate>
+				--update(self, elapsed)
+			</OnUpdate>			
+		</Scripts>
+		<NormalTexture name="$parentBG">
+			<Color r="0.4" g="0.4" b="0.8" />
+		</NormalTexture>
+	</Button>
+	
+	
+	
+	
+	<Frame name="ListScrollFrameTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="400" y="310" />
+		</Size>
+		<Anchors>
+			<Anchor point="TOPRIGHT" relativePoint="TOPLEFT">
+				<Offset x="-200" y="0">
+				</Offset>
+			</Anchor>
+			<Anchor point="BOTTOLEFT" relativePoint="BOTTOMRIGHT"/>
+		</Anchors>
+		
+			
+		<Scripts>
+			<OnShow>
+				--print("LETS SHOW")
+				OnShowFrame(self)
+			</OnShow>
+			<OnHide>
+				--print("LETS HIDE")
+			</OnHide>
+		</Scripts>
+		
+	</Frame>
+	<Frame name="TitleTemplate" virtual="true">
+		<Size>
+			<AbsDimension x="300" y="310" />
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER" />
+		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Gold-Header">
+					<Size>
+						<AbsDimension x="300" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="30" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString name="$parentText" inherits="GameFontNormal" text="USER_NAME">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentTitle">
+							<Offset>
+								<AbsDimension x="0" y="-13" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		
+		
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Gold-Background" tile="true"
+		edgeFile="Interface\DialogFrame\UI-DialogBox-Gold-Border">
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+		</Backdrop>
+		
+	</Frame>
+	
+	
+
+	<Frame name="GolemUI_Main_Frame" parent="UIParent" movable="true" enableMouse="true" clampedToScreen="true" >
+		<Scripts>
+			<OnLoad>
+				self:RegisterForDrag("LeftButton")
+				self:SetUserPlaced(1)
+			</OnLoad>
+			<OnDragStart>
+				self:StartMoving()
+			</OnDragStart>
+			<OnDragStop>
+				self:StopMovingOrSizing()
+			</OnDragStop>
+		</Scripts>
+		<Anchors>
+			<Anchor point="RIGHT" relativePoint="RIGHT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Size>
+			<AbsDimension x="220" y="310" />
+		</Size>
+		
+
+		<Layers>
+			<Layer level="ARTWORK" parent="GolemUI_Main_Frame">
+				<Texture name="$parentTitle" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size>
+						<AbsDimension x="300" y="60"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOP">
+							<Offset>
+								<AbsDimension x="0" y="10" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</Texture>
+				<FontString inherits="GameFontNormal" text="ADDON_TITLE">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="$parentTitle">
+							<Offset>
+								<AbsDimension x="0" y="-13" />
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>		
+		</Layers>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" tile="true"
+		edgeFile="Interface\DialogFrame\UI-DialogBox-Border">
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+		</Backdrop>		
+		
+		
+	</Frame>
+	
+</Ui>
